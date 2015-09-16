@@ -1,0 +1,27 @@
+Logfile: Wed Sep 16 13:34:42 EDT 2015
+-------------------------------------
+
+Output of "ls -al" command
+
+total 28
+drwxrwxr-x  2 lindsayad lindsayad 4096 Sep 16 13:34 .
+drwxrwxr-x 12 lindsayad lindsayad 4096 Sep 15 13:56 ..
+-rwxrwxr-x  1 lindsayad lindsayad   57 Nov 14  2014 bash_script
+-rwxrwxr-x  1 lindsayad lindsayad   68 Nov 14  2014 bash_script~
+-rwxrwxr-x  1 lindsayad lindsayad  727 Sep 16 13:33 exec
+-rw-rw-r--  1 lindsayad lindsayad  952 Mar 10  2015 important_terminal_commands.txt
+-rw-rw-r--  1 lindsayad lindsayad  105 Sep 16 13:34 logfile.txt
+
+
+Output of "df" command
+
+Filesystem     1K-blocks      Used Available Use% Mounted on
+/dev/sda8       47930248  22382724  23089720  50% /
+none                   4         0         4   0% /sys/fs/cgroup
+udev             4028976        12   4028964   1% /dev
+tmpfs             807952      1196    806756   1% /run
+none                5120         0      5120   0% /run/lock
+none             4039760       220   4039540   1% /run/shm
+none              102400        40    102360   1% /run/user
+/dev/sda1         507904     54604    453300  11% /boot/efi
+/dev/sda9      399887408 125709776 253841456  34% /home

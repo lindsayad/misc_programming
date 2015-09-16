@@ -1,0 +1,12 @@
+2/6/15
+
+I see what's happening now with my ngspice script. As long as I am modelling the
+plasma as a variable resistor that can freely vary between what I consider it's "open
+circuit" condition (below breakdown voltage) and "short circuit" condition (above 
+breakdown voltage), then the "plasma" will adopt whatever resistance is necessary
+such that the potential across the plasma is exactly equal to the breakdown voltage.
+
+So, if I want to do a circuit model of the plasma, I cannot allow it to be a continuously
+varying resistance between open and short circuit conditions.
+
+

@@ -1,0 +1,32 @@
+#!/usr/bin/python
+#
+import matplotlib.pyplot as plt
+import numpy as np
+#
+arrowShrinkSize = 0.1
+figureFontSize = 12
+arrowWidth = 1
+N_A = 1.0e23
+#
+z, H2OSurface = np.loadtxt('1D_water_vapor_z_equals_interface_height.txt',unpack = True)
+z_min, z_max = z.min(), z.max()
+H2OSurface = H2OSurface * N_A
+Surface_min, Surface_max = H2OSurface.min(), H2OSurface.max()
+#
+z2, H2OHalf = np.loadtxt('1D_water_vapor_z_equals_halfway_between.txt',unpack = True)
+z2_min, z2_max = z2.min(), z2.max()
+H2OHalf = H2OHalf * N_A
+Half_min, Half_max = H2OHalf.min(), H2OHalf.max()
+#
+plt.plot(z,H2OSurface, 'k-', label = 'At interface')
+plt.plot(z2,H2OHalf, 'k--', label = 'Middle of gap')
+plt.xlabel('z (m)', fontsize = figureFontSize)
+plt.ylabel('Water vapor density (m^-3)', fontsize = figureFontSize)
+plt.legend(loc=4, fontsize = figureFontSize)
+#plt.plot([0, 0],[290, 302], 'k--')
+#plt.annotate('Interface', xy=(0.0,301), xytext = (-0.003, 300), arrowprops=dict(facecolor='black',shrink=arrowShrinkSize, width = arrowWidth), fontsize = figureFontSize)
+#plt.text(0.004, 293, 'Gas', fontsize = figureFontSize)
+#plt.text(-0.003, 293, 'Liquid', fontsize = figureFontSize)
+#
+plt.savefig('1D_water_vapor_plot.eps',format='eps')
+plt.show()

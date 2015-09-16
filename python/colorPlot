@@ -1,0 +1,17 @@
+#!/usr/bin/python
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+dx, dy = 0.015, 0.005
+y,x = np.mgrid[slice(-3, 3 + dy, dy), slice(-3, 3 + dx, dx)]
+z = (1 - x / 2. + x ** 5 + y**3) * np.exp(-x**2 - y**2)
+z = z[:-1, :-1]
+z_min, z_max = -np.abs(z).max(), np.abs(z).max()
+plt.subplot(2, 2, 1)
+plt.pcolor(x, y, z, cmap='gist_rainbow', vmin=z_min, vmax=z_max)
+plt.title('pcolor')
+plt.axis([x.min(),x.max(),y.min(),y.max()])
+#plt.colorbar()
+plt.show()
+
