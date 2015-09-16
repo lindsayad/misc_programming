@@ -1,0 +1,31 @@
+grep -r 'text goes here' path_goes_here
+
+visit -cli -s visitInterface.py
+
+visit -cli -nowin -s visitInterface.py
+
+# For making Qt/PySide work: (although I can't recall whether the most recent version of libqt4-dev was already installed)...
+
+sudo apt-get install libqt4-dev
+pip install PySide # This command builds PySide from source
+
+# Searching for most recently updated files recursively in a directory
+
+find . -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
+
+# How to unzip a zip file from the terminal
+
+unzip file.zip -d destination_folder
+
+# How to get the summarized sizes of folders and their subfolders. Of questionable utility.
+
+du -sh /*
+
+# How to list the size of just the immediate directories in the current root directory
+
+du -h --max-depth=1
+
+# How to list the size of just the immediate directories and files in the current root directory, sorted by size with file size given in MB
+
+sudo du -am --max-depth=1 | sort -n
+
