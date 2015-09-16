@@ -1,0 +1,106 @@
+grep -r 'text goes here' path_goes_here
+
+visit -cli -s visitInterface.py
+
+visit -cli -nowin -s visitInterface.py
+
+# For making Qt/PySide work: (although I can't recall whether the most recent version of libqt4-dev was already installed)...
+
+sudo apt-get install libqt4-dev
+pip install PySide # This command builds PySide from source
+
+# Searching for most recently updated files recursively in a directory
+
+find . -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
+
+# How to unzip a zip file from the terminal
+
+unzip file.zip -d destination_folder
+
+# How to get the summarized sizes of folders and their subfolders. Of questionable utility.
+
+du -sh /*
+
+# How to list the size of just the immediate directories in the current root directory
+
+du -h --max-depth=1
+
+# How to list the size of just the immediate directories and files in the current root directory, sorted by size with file size given in MB
+
+sudo du -am --max-depth=1 | sort -n
+
+
+
+General bash notes:
+
+    Great reference website: http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO.html
+    When assigning variables, don’t leave spaces on any side of the equals sign
+
+Sync directories between local and remote computers (copies the contents from the first directory to the second directory (it does not delete files in the second directory if they weren’t present in the first directory which is very nice)). Note that it is important to have the forward slash at the end of the first directory (so that you only transfer the contents of that directory as opposed to planting the source directory in the destination directory). No slash after the destination directory. -a flag stands for archive and will preserve modification times, sym links (I think?), and permissions. -z flags stands for compression. –progress will show the files being transferred and the progress of those transfers
+
+rsync -e “ssh -p <port-number>” -az –progress <remote-user>@<ip-address>:<remote-path>/ <local-path>
+
+Find library or package locations
+
+sudo dpkg -L
+
+Find text in file names (different from grep which looks for text in files)
+
+find . -type f -name “*text*”
+
+Find text in a directory:
+
+grep –include=\*.{c,h} -rnw ‘directory’ -e “pattern”
+
+List all processes (flag -e) in standard file format (-f):
+
+ps -ef
+
+Lookup specific processes:
+
+pgrep firefox
+
+Kill a specific process:
+
+pkill firefox
+
+Remove a package using dpkg
+
+sudo -E dpkg -r <package>
+
+Recursively delete files of specific extension
+
+find . -name “*.ext” -type f -delete
+
+Other commands:
+
+grep -r ‘text goes here’ path_goes_here
+
+visit -cli -s visitInterface.py
+
+visit -cli -nowin -s visitInterface.py
+
+# For making Qt/PySide work: (although I can’t recall whether the most recent version of libqt4-dev was already installed)…
+
+sudo apt-get install libqt4-dev
+pip install PySide # This command builds PySide from source
+
+# Searching for most recently updated files recursively in a directory
+
+find . -type f -printf ‘%T@ %p\n’ | sort -n | tail -1 | cut -f2- -d” ”
+
+# How to unzip a zip file from the terminal
+
+unzip file.zip -d destination_folder
+
+# How to get the summarized sizes of folders and their subfolders. Of questionable utility.
+
+du -sh /*
+
+# How to list the size of just the immediate directories in the current root directory
+
+du -h –max-depth=1
+
+# How to list the size of just the immediate directories and files in the current root directory, sorted by size with file size given in MB
+
+sudo du -am –max-depth=1 | sort -n

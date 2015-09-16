@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+from fipy import *
+import math
+import numpy as np
+#
+nx = 100
+L = 5.e-3 # Gap between needle and water surface (m)
+e = 1.6e-19 # Coulombic charge of an electron (C)
+eps = 8.85e-12 # Permittivity of free space (F/m)
+#
+dx = L/nx
+#
+mesh = Grid1D(nx=nx, dx=dx)
+#
+phi = CellVariable(name="Potential (V)", mesh=mesh, value=0.)
+Efield = -phi.faceGrad
+EfieldMag = np.fmax(np.fabs(Efield), 1.e-6)
+#
+inidensity = 1.e20 # (m^-3)
+electrons = CellVariable(name="electrons (m^-3)", mesh=mesh, value=0)
+ions = CellVariable(name="ions", mesh=mesh, value=inidensity)
+rho = e * (ions - electrons) # Charge density
+#
+alpha = .35 * np.exp(-1.65e3 / EfieldMag) # Ionization coefficient (1/m)
+We = -60.6*Efield**.75 # Electron velocity vector (m/s)
+Wp = 2.43 / 100 * Efield # Ion velocity vector (m/s)
+De = 1800 / (100**2) # Electron diffusion coefficient
+Dp = .046 / (100**2) # Ion diffusion coefficient
+#
+phi.equation = (DiffusionTerm(coeff = eps) + rho == 0)
+phi.constrain(0., mesh.facesLeft)
+phi.equation.solve(var=phi)
+#
+viewer= Viewer(vars=phi)
+viewer.plot()
+raw_input("Press any key to continue...")
+
