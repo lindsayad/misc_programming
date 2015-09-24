@@ -29,8 +29,6 @@ du -h --max-depth=1
 
 sudo du -am --max-depth=1 | sort -n
 
-
-
 General bash notes:
 
     Great reference website: http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO.html
@@ -104,3 +102,4 @@ du -h –max-depth=1
 # How to list the size of just the immediate directories and files in the current root directory, sorted by size with file size given in MB
 
 sudo du -am –max-depth=1 | sort -n
+>>>>>>> d5589c3876440b1f1551f2124f8b0db9495af91e
