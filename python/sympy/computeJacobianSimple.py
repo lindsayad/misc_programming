@@ -1,0 +1,42 @@
+from sympy import *
+x, y, t, u1, u2 = symbols('x y t u1 u2')
+b1, b2 = symbols('b1 b2')
+test = symbols('test', cls=Function)
+phi1, phi2 = symbols('phi1 phi2', cls=Function)
+u = u1*phi1(x,y) + u2*phi2(x,y)
+ux = diff(u,x)
+uy = diff(u,y)
+testx = diff(test(x,y),x)
+testy = diff(test(x,y),y)
+phi1x = diff(phi1(x,y),x)
+phi1y = diff(phi1(x,y),y)
+grad_u = Matrix([ux,uy])
+grad_test = Matrix([testx,testy])
+grad_phi1 = Matrix([phi1x,phi1y])
+beta = Matrix([b1,b2])
+num = beta.dot(grad_u)
+denom = grad_u.dot(grad_u)
+betah = num / denom * grad_u
+supg_test = betah.dot(grad_test)
+supg_test_deriv = diff(supg_test,u1)
+v, grad_v, grad_psi1, beta_dot_grad_v, grad_v_sqrd = symbols('v grad_v grad_psi1 beta_dot_grad_v grad_v_sqrd')
+vx, vy, psi1x, psi1y = symbols('vx vy psi1x psi1y')
+grad_v_dot_grad_psi1 = symbols('grad_v_dot_grad_psi1')
+expr = supg_test_deriv.subs([(u,v),(grad_u,grad_v),(beta.dot(grad_u),beta_dot_grad_v),(grad_phi1,grad_psi1),(grad_u.dot(grad_u),grad_v_sqrd)])
+expr = expr.subs([(ux,vx),(uy,vy),(phi1x,psi1x),(phi1y,psi1y)])
+expr = simplify(expr)
+grad_w = Matrix([vx,vy])
+grad_delta1 = Matrix([psi1x,psi1y])
+expr = expr.subs(grad_w.dot(grad_delta1),grad_v_dot_grad_psi1)
+grad_v_dot_grad_test = symbols('grad_v_dot_grad_test')
+expr = expr.subs(grad_w.dot(grad_test),grad_v_dot_grad_test)
+grad_psi1_dot_grad_test, beta_dot_grad_psi1 = symbols('grad_psi1_dot_grad_test beta_dot_grad_psi1')
+expr = expr.simplify()
+expr = expr.subs([(grad_delta1.dot(grad_test),grad_psi1_dot_grad_test),(beta.dot(grad_delta1),beta_dot_grad_psi1)])
+expr = expr.subs(beta_dot_grad_psi1*vx*Derivative(test(x, y), x) + beta_dot_grad_psi1*vy*Derivative(test(x, y), y),beta_dot_grad_psi1*grad_v_dot_grad_test)
+expr = expr.subs(beta_dot_grad_v*psi1x*Derivative(test(x, y), x) + beta_dot_grad_v*psi1y*Derivative(test(x, y), y), beta_dot_grad_v*grad_psi1_dot_grad_test)
+print expr
+
+# Output of this code: (-2*beta_dot_grad_v*grad_v_dot_grad_psi1*grad_v_dot_grad_test + grad_v_sqrd*(beta_dot_grad_psi1*grad_v_dot_grad_test + beta_dot_grad_v*grad_psi1_dot_grad_test))/grad_v_sqrd**2
+
+# Nice work!

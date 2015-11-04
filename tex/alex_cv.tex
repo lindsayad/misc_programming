@@ -1,0 +1,196 @@
+% !TEX program = XeLaTeX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plasmati Graduate CV
+% LaTeX Template
+% Version 2.0 (10/2/15)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Alessandro Plasmati (alessandro.plasmati@gmail.com)
+% 
+% Second author:
+% Alexander Lindsay (adlinds3@ncsu.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Important note:
+% This template needs to be compiled with XeLaTeX.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[a4paper,10pt]{article} % Default font size and paper size
+
+\usepackage{fontspec} % For loading fonts
+\defaultfontfeatures{Mapping=tex-text}
+
+\usepackage{xunicode,xltxtra,url,parskip} % Formatting packages
+
+\usepackage[usenames,dvipsnames]{xcolor} % Required for specifying custom colors
+
+\usepackage[big]{layaureo} % Margin formatting of the A4 page, an alternative to layaureo can be \usepackage{fullpage}
+% To reduce the height of the top margin uncomment: \addtolength{\voffset}{-1.3cm}
+
+\usepackage{hyperref} % Required for adding links	and customizing them
+\definecolor{linkcolour}{rgb}{0,0.2,0.6} % Link color
+\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour,linkcolor=linkcolour} % Set link colors throughout the document
+
+\usepackage{titlesec} % Used to customize the \section command
+\titleformat{\section}{\Large\scshape\raggedright}{}{0em}{}[\titlerule] % Text formatting of sections
+%\titlespacing{\section}{0pt}{3pt}{3pt} % Spacing around sections
+\titlespacing*{\section} {0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+\usepackage[none]{hyphenat}
+
+\usepackage{tabularx}
+\usepackage[labelformat=empty]{caption}
+\usepackage{verbatim}
+\usepackage{placeins}
+
+\begin{document}
+
+\pagestyle{empty} % Removes page numbering
+
+\font\fb=''[cmr10]'' % Change the font of the \LaTeX command under the skills section
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CONTACT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%\par{\centering{\large Alexander Lindsay}\par} % Your name
+%\centering{\large Alexander Lindsay}
+%\par{\centering{(425) 772-9375}\par}
+%\par{\centering{adlinds3@ncsu.edu}\par}
+
+\begin{center}
+\Large Alexander Lindsay\\
+\normalsize (425) 772-9375\\
+adlinds3@ncsu.edu\\
+alexlindsay.info\\
+github.com/lindsayad\\
+\end{center}
+
+%\section{Personal Data}
+
+%\begin{tabular}{rl}
+%\textsc{Address:} & 4003 18th St, San Francisco, CA, 94114 \\
+%\textsc{Phone:} & (425) 772-9375\\
+%\textsc{email:} & \href{mailto:adlinds3@ncsu.edu}{adlinds3@ncsu.edu}
+%\end{tabular}
+
+%----------------------------------------------------------------------------------------
+%	EDUCATION
+%----------------------------------------------------------------------------------------
+
+\section{Education}
+
+\begin{table}[h]
+\begin{tabularx}{\textwidth}{rX}	
+
+\textsc{Current} & Doctoral Candidate in Nuclear Engineering, North Carolina State University | National Science Foundation Graduate Research Fellow | Thesis: ``Physical and Chemical Interactions at Plasma-Water Interfaces.'' | Advisor: Steven Shannon | \textsc{Gpa}: 4.0/4.0\\
+&\\
+
+%------------------------------------------------
+
+\textsc{Current} & Visiting Researcher in Chemical Engineering, University of California-Berkeley | Research: Modelling of Plasma-Liquid Interfacial Transport | Advisor: David Graves\\
+&\\
+
+%------------------------------------------------
+
+\textsc{August} 2010 & Bachelor's of Science in Chemical Engineering, University of Washington | Research (2007-08): Synthesis of Cobalt \& Ruthenium Complexes | Advisor: James Mayer | Research (2009): Effect of Magnetic Dipole Interactions on Energy Eigenstates | Advisor: Xiaosong Li | \textsc{Gpa}: 3.88/4.0\\ 
+
+\end{tabularx}
+\end{table}
+
+%-------------------------------------------------------------------------------
+%	Publications 
+%-------------------------------------------------------------------------------
+
+\section{Publications}
+
+\begin{table}[h]
+\begin{tabularx}\textwidth{rX}
+
+1. & Lindsay, A., Anderson, C., Shannon, S., \& Graves, D. Momentum, Heat, and Neutral Mass Transport in Convective Atmospheric Pressure Plasma-Liquid Systems and Implications for Aqueous Targets. \textit{Accepted for Publication in special issue of J. Phys. D: Applied Physics on Plasma-Liquids}\\
+2. & Lindsay, A., Byrns, B., King, W., Andhvarapou, A., Fields, J., Knappe, D., Fonteno, W., \& Shannon, S. (2014). Fertilization of Radishes, Tomatoes, and Marigolds Using a Large-Volume Atmospheric Glow Discharge. \textit{Plasma Chemistry and Plasma Processing}, 34(6), 1271-1290.\\
+3. & Byrns, B., Wooten, D., Lindsay, A., \& Shannon, S. (2012). A VHF driven coaxial atmospheric air plasma: electrical and optical characterization. \textit{Journal of Physics D: Applied Physics}, 45(19), 195204.\\
+4. & Manner, V. W., Lindsay, A. D., Mader, E. A., Harvey, J. N., \& Mayer, J. M. (2012). Spin-forbidden hydrogen atom transfer reactions in a cobalt biimidazoline system. \textit{Chemical Science}, 3(1), 230-243.\\
+5. & Liang, W., Isborn, C. M., Lindsay, A., Li, X., Smith, S. M., \& Levis, R. J. (2010). Time-Dependent Density Functional Theory Calculations of Ehrenfest Dynamics of Laser Controlled Dissociation of NO+: Pulse Length and Sequential Multiple Single-Photon Processes. \textit{The Journal of Physical Chemistry A}, 114(21), 6201-6206.\\
+
+\end{tabularx}
+\end{table}
+
+\pagebreak
+
+\section{Presentations}
+
+\begin{table}[h]
+\begin{tabularx}\textwidth{rX}
+
+1. & Lindsay, A. Transport Processes from Plasma to Liquid in Convective Systems. Invited Talk. Northern California Chapter of the American Vacuum Society. (2014)\\
+2. & Lindsay, A. Transport Processes from Plasma to Liquid in Convective Systems. Gaseous Electronics Conference (2014)\\
+3. & Lindsay, A. Characterization of Atmospheric Pressure RF Discharges with Aqueous Plasma Facing Surfaces. International Conference on Plasma Science (2014)\\
+4. & Lindsay, A. Atmospheric Pressure Glow Discharge for Point-of-Use Water Treatment. American Vacuum Society (2012)\\
+5. & Lindsay, A. Atmospheric Pressure Glow Discharge for Point-of-Use Water Treatment. Gaseous Electronics Conference (2012)\\
+
+\end{tabularx}
+\end{table}
+
+\FloatBarrier
+%----------------------------------------------------------------------------------------
+%	Fellowships & Scholarships
+%----------------------------------------------------------------------------------------
+
+\section{Fellowships \& Scholarships}
+
+\begin{table}[h]
+\begin{tabular}{rl}
+\textsc{Current} & National Science Foundation Graduate Research Fellow\\
+\textsc{2009-10} & Hendrickson Scholarship\\
+\textsc{2008-09} & Glockling Memorial Scholarship\\
+\textsc{2008-09} & NASA Space Grant\\
+\textsc{2008} & Mary Gates Endowment Research Scholarship\\
+\textsc{2006-10} & Emerging Leaders in Engineering Scholarship\\
+\textsc{2006-08} & University of Washington Undergraduate Scholar Award\\
+%\textsc{
+
+%\textsc{June} 2010 & {\textsc{Gmat}\textregistered}\setmainfont[SmallCapsFont=Fontin SmallCaps]{Fontin-Regular}: 730 (\textsc{q:50;v:39}) 96\textsuperscript{th} percentile; \textsc{awa}: 6.0/6.0 (89\textsuperscript{th} percentile)
+\end{tabular}
+\end{table}
+
+\FloatBarrier
+
+%----------------------------------------------------------------------------------------
+%	COMPUTATIONAL SKILLS 
+%----------------------------------------------------------------------------------------
+
+\section{Computational Skills}
+
+\begin{tabular}{ll}
+%Basic Knowledge: & \textsc{php}, my\textsc{sql}, \textsc{html}, Access, \textsc{Linux}, ubuntu, {\fb \LaTeX}\setmainfont[SmallCapsFont=Fontin SmallCaps]{Fontin-Regular}\\
+
+Intermediate experience: & linux, bash, python (esp. MatPlotLib \& SymPy), c++,\\
+& tex, MOOSE, file \& web-servers, ParaView, OpenFOAM, emacs\\
+
+Extensive experience: & Mathematica, Comsol
+
+\end{tabular}
+
+%----------------------------------------------------------------------------------------
+%	PASSIONS & INTERESTS
+%----------------------------------------------------------------------------------------
+
+\section{Passions \& Interests}
+
+Public good, anything open-source (software, hardware, etc.), programming, running (2:42 marathon)\\
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

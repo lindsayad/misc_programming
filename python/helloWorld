@@ -1,0 +1,10 @@
+#!/usr/bin/python
+# Test script
+
+print 'Hello, world!'
+print 2+2
+
+# To execute the commands in this file from the standard python interepreter, type:
+# execfile('helloWorld')
+
+# From ipython you would type %run helloWorld

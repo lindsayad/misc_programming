@@ -1,0 +1,20 @@
+<!-- Credit for this code belongs to http://public.kitware.com/pipermail/paraview/2013-June/028588.html -->
+
+<ParaViewPlugin>
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+<SourceProxy name="EXODUSRrefresh" base_proxygroup="sources"
+base_proxyname="ExodusIIReader" class="vtkExodusIIReader">
+      <Property name="Refresh" command="Modified"
+panel_widget="command_button"/>
+      <Hints>
+        <ReaderFactory extensions="e" file_description="ExodusII Reader
+(Refresh button)" />
+      </Hints>
+    </SourceProxy>
+  </ProxyGroup>
+  </ServerManagerConfiguration>
+  <ParaViewReaders>
+    <Reader name="ReaderWithButton" />
+  </ParaViewReaders>
+</ParaViewPlugin>

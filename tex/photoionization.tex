@@ -1,0 +1,89 @@
+% Authors: Alexander Lindsay
+% License: Creative Commons Attribution 4.0 International
+% License link: creativecommons.org/licenses/by/4.0/legalcode 
+% Contact: adlinds3@ncsu.edu
+%
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{verbatim}
+\usepackage{mathtools}
+
+\begin{document}
+
+\begin{comment}
+
+  \begin{equation}
+    R\left(x\right) = \frac{\Sigma_a}{2}\left(\int_0^x S\left(x_k\right) e^{-\Sigma_a\left(x-x_k\right)} dx_k + \int_x^L S\left(x_k\right) e^{-\Sigma_a\left(x_k-x\right)} dx_k\right)
+    \label{eq:photo}
+  \end{equation}
+
+  \begin{equation}
+    R\left(x\right) = \frac{\Sigma_a}{2}\left(\int_0^L S\left(x_k\right) e^{-\Sigma_a\lvert x-x_k\rvert} dx_k\right)
+    \label{eq:simplifiedPhoto}
+  \end{equation}
+
+  \begin{equation}
+    S\left(x\right) = \alpha\ n_e\left(x\right) \lvert W_e\left(x\right)\rvert\ exp\left(\frac{-E_c}{\lvert E\left(x\right)\rvert}\right)
+    \label{eq:source}
+  \end{equation}
+
+  \begin{equation}
+    \frac{\partial}{\partial u_j}\left(\frac{\left(\vec{a}\cdot\nabla u\right)^2}{\nabla u\cdot\nabla u}\left(\vec{c}\cdot\nabla u\right)\right) = \frac{\partial}{\partial u}\left(\frac{\left(\vec{a}\cdot\nabla u\right)^2}{\nabla u\cdot\nabla u}\left(\vec{c}\cdot\nabla u\right)\right)\phi_j
+    \label{eq:Jacobians}
+  \end{equation}
+
+  \begin{equation}
+    \frac{\partial}{\partial u}\nabla u = \nabla
+    \label{eq:simple}
+  \end{equation}
+
+  \begin{equation}
+    \frac{\partial}{\partial t}n_e+\nabla\cdot\Gamma_e=R_e
+  \end{equation}
+
+  \begin{equation}
+    \frac{\partial}{\partial t}n_i+\nabla\cdot\Gamma_i=R_i
+  \end{equation}
+
+  \begin{equation}
+    \frac{\partial}{\partial t}n_{\epsilon}+\nabla\cdot\Gamma_{\epsilon}+\vec{E}\cdot\Gamma_e=R_{\epsilon}
+  \end{equation}
+
+  \begin{equation}
+    -\nabla\cdot\nabla V = \frac{e}{\epsilon_0}(n_i-n_e)
+  \end{equation}  
+
+  \begin{align}
+    \Gamma_e &= -n_e(\mu_e\cdot\vec{E}-D_e\cdot\nabla n_e) \\
+    \Gamma_{\epsilon} &= -n_{\epsilon}(\mu_{\epsilon}\cdot\vec{E}-D_{\epsilon}\cdot\nabla n_{\epsilon}) \\
+    n_{\epsilon} &= \frac{3}{2}n_eT_e \\
+    \vec{E} &= -\nabla V \\
+  \end{align}
+
+  Example of a reaction in R$_{e,i,\epsilon}$:
+
+  \begin{align}
+    R_1 &= k_1n_en_{i} \\
+    k_1 &= c_1T_e^{0.5}exp(-E_a/T_e)
+  \end{align}
+
+\end{comment}
+
+DGFunctionDiffusionDirichletBC
+
+\begin{equation}
+  { \nabla u \cdot n_e} [v] + \epsilon { \nabla v \cdot n_e } [u] + (\frac{\sigma}{|e|} \cdot [u][v]) 
+\end{equation}
+
+DGDiffusion
+
+\begin{equation*}
+\begin{multlined}
+{\nabla u * n_e} [v] + \epsilon { \nabla v * n_e } [u] + (\sigma / |e| * [u][v]) \\
+[a] = [ a_1 - a_2 ] \\
+{a} = 0.5 * (a_1 + a_2)
+\end{multlined}
+\end{equation*}
+
+\end{document}

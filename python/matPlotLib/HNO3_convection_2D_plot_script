@@ -1,0 +1,106 @@
+#!/usr/bin/python
+#
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import numpy as np
+from matplotlib import rc
+rc('text', usetex=True)
+#
+dpiRatio = 300.0/80.0
+DishRadius = 0.03
+WaterHeight = 0.0035368
+GapDistance = 0.0064632
+NeedleRadius = .00062
+arrowShrinkSize = 0.1
+arrowWidth = 1
+fontColor = 'r'
+darkColor = 'k'
+mpl.rcParams.update({'font.size': 16})
+#
+HNO3DiffusionData = np.loadtxt('HNO3_convection.txt')
+i = 0
+a,b = HNO3DiffusionData.shape
+ainitial = a
+while i < a:
+    if np.isnan(HNO3DiffusionData[i,2]):
+	    HNO3DiffusionData = np.delete(HNO3DiffusionData, (i), axis = 0)
+	    a,b = HNO3DiffusionData.shape
+    else:
+        i = i + 1		
+#
+afinal = a
+#
+Nx1, idx1 = np.unique(HNO3DiffusionData[:,0], return_inverse=True)
+Nx2, idx2 = np.unique(HNO3DiffusionData[:,1], return_inverse=True)
+#
+HNO3Diffusion = np.empty((Nx1.shape[0],Nx2.shape[0]))
+HNO3Diffusion[idx1,idx2] = HNO3DiffusionData[:,2]
+#
+r, z = np.meshgrid(Nx1, Nx2)
+#
+HNO3Diffusion_min, HNO3Diffusion_max = np.min(HNO3Diffusion), np.max(HNO3Diffusion)
+#
+NO3mDiffusionData = np.loadtxt('NO3m_convection.txt')
+i = 0
+a,b = NO3mDiffusionData.shape
+ainitial = a
+while i < a:
+    if np.isnan(NO3mDiffusionData[i,2]):
+	    NO3mDiffusionData = np.delete(NO3mDiffusionData, (i), axis = 0)
+	    a,b = NO3mDiffusionData.shape
+    else:
+        i = i + 1		
+#
+afinal = a
+#
+Nx1, idx1 = np.unique(NO3mDiffusionData[:,0], return_inverse=True)
+Nx2, idx2 = np.unique(NO3mDiffusionData[:,1], return_inverse=True)
+#
+NO3mDiffusion = np.empty((Nx1.shape[0],Nx2.shape[0]))
+NO3mDiffusion[idx1,idx2] = NO3mDiffusionData[:,2]
+#
+r2, z2 = np.meshgrid(Nx1, Nx2)
+#
+NO3mDiffusion_min, NO3mDiffusion_max = np.min(NO3mDiffusion), np.max(NO3mDiffusion)
+#
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.set_aspect(1.0)
+#
+HNO3DiffusionAx = plt.pcolor(r, z, HNO3Diffusion.transpose(), cmap = 'jet', vmin= 0, vmax = HNO3Diffusion_max, rasterized = True)
+HNO3DiffusionBar = plt.colorbar(ticks=[0, 1e16, 2e16, 3e16, 4e16, 5e16, 6e16, 7e16, 8e16])
+HNO3DiffusionBar.set_label('Gaseous Nitric Acid Density * 1e-16 (m$^{-3}$)')
+HNO3DiffusionBar.set_ticklabels(['0', '1', '2', '3', '4', '5', '6', '7', '8'])
+NO3mDiffusionAx = plt.pcolor(r2, z2, NO3mDiffusion.transpose(), cmap = 'jet', vmin= 0, vmax = NO3mDiffusion_max, rasterized = True)
+NO3mDiffusionBar = plt.colorbar(ticks=[0,0.6e19,1.2e19,1.8e19,2.4e19,3.0e19,3.6e19,4.2e19,4.8e19,5.4e19])
+NO3mDiffusionBar.set_label('Aqueous Nitrate Density * 1e-19 (m$^{-3}$)')
+NO3mDiffusionBar.set_ticklabels(['0','0.6','1.2','1.8','2.4','3.0','3.6','4.2','4.8','5.4'])
+plt.axis([0.0,DishRadius+0.001,-WaterHeight,DishRadius-WaterHeight])
+#
+plt.xlabel('r (m)')
+plt.ylabel('z (m)')
+#
+plt.annotate('Gas-liquid interface', xy=(0.017,0), xytext=(0.010,0.004), color = fontColor, arrowprops=dict(facecolor='fontColor',shrink=arrowShrinkSize, width = arrowWidth, color = fontColor))
+plt.annotate('Dish wall', xy=(DishRadius,0.002), xytext=(DishRadius-0.01, 0.01), color = fontColor, arrowprops=dict(color=fontColor,shrink=arrowShrinkSize, width=arrowWidth))
+plt.annotate('Needle tip/jet outlet', xy = (NeedleRadius+2e-4,GapDistance), xytext = (0.005,0.015), color = fontColor, arrowprops=dict(color = fontColor, shrink=arrowShrinkSize,width=arrowWidth))
+plt.annotate('Symmetry axis', xy = (0,-0.002), xytext = (0.002,-WaterHeight/2-0.001),color = darkColor, arrowprops=dict(color = darkColor, shrink=arrowShrinkSize,width=arrowWidth))
+#
+plt.plot([DishRadius, DishRadius],[-WaterHeight,GapDistance], color='k', linestyle = '-', linewidth = 2)
+plt.plot([NeedleRadius,NeedleRadius],[GapDistance,DishRadius-WaterHeight], color='k', linestyle = '-', linewidth = 2)
+plt.plot([NeedleRadius+1e-4,NeedleRadius+1e-4],[GapDistance,DishRadius-WaterHeight], color='k', linestyle = '-', linewidth = 2)
+plt.plot([NeedleRadius+2e-4,NeedleRadius+2e-4],[GapDistance,DishRadius-WaterHeight], color='k', linestyle = '-', linewidth = 2)
+plt.plot([0,DishRadius],[0,0], color='k', linestyle = '-', linewidth = 2) 
+#
+ax.text(0.020, 0.023, 'Gas phase', color = fontColor)
+ax.text(0.018, -0.003, 'Liquid phase')
+#
+ax.set_xticks([0.000, 0.010, 0.020, 0.030])
+ax.set_xticklabels(['0.000','0.010','0.020','0.030'])
+ax.set_yticks([0,.005,.01,.015,.02,.025])
+ax.set_yticklabels(['0.000','0.005','0.010','0.015','0.020','0.025'])
+# 
+fig.savefig('HNO3Convection2D.eps',format='eps')
+#
+plt.show()
+
+

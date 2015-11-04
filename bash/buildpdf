@@ -1,0 +1,12 @@
+#!/bin/bash
+
+kill paper.pdf
+latex paper.tex
+bibtex paper.aux
+latex paper.tex
+latex paper.tex
+dvips -P pdf -t letter -o paper.ps paper.dvi #-G0 paper.dvi
+ps2pdf paper.ps
+xdg-open paper.pdf
+
+#-interaction nonstopmode 

@@ -1,0 +1,12 @@
+visitlog.py
+visit/copiedScripts/
+*.png
+*.pdf
+visit/visitInterface.py
+*~
+*.txt
+CellDerivatives.xml
+CopiedReloadPlugin.xml
+*.pyc
+*.out
+*#
