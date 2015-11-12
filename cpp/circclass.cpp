@@ -1,25 +1,61 @@
 #include <iostream>
 using namespace std;
 
-class Circle {
-        double radius;
-    public:
-        Circle() { radius = 5; }
-        Circle(double r) { radius = r; }
-        double circum() {return 2*radius*3.14159265;}
+class FEProblem {
+public:
+  FEProblem(double r);
+  FEProblem();
+
+  bool boundaryRestricted() { return _boundary_restricted; }
+  double getRadius() { return _radius; }
+  void setRadius(double r) { _radius = r; }
+
+protected:
+  bool _boundary_restricted = false;
+
+private:
+  double _radius;
 };
 
-int main () {
-    Circle foo (10.0);
-    Circle bar = 20.0;
-    Circle baz {30.0};
-    Circle qux = {40.0};
-    Circle qip {};
+FEProblem::FEProblem(double r):
+  _radius(r),
+  _boundary_restricted(true) {}
 
-    cout <<  "foo's circum: " << foo.circum() << endl;
-    cout <<  "bar's circum: " << bar.circum() << endl;
-    cout <<  "baz's circum: " << baz.circum() << endl;
-    cout <<  "qux's circum: " << qux.circum() << endl;
-    cout <<  "qip's circum: " << qip.circum() << endl;
-    return 0;
+FEProblem::FEProblem() {}
+
+class BoundaryRestrictable {
+public:
+  BoundaryRestrictable(FEProblem fe_problem);
+  double getActiveRadius() { return _active_radius; }
+
+private:
+  double _active_radius;
+};
+
+BoundaryRestrictable::BoundaryRestrictable(FEProblem fe_problem) :
+  _active_radius(fe_problem.getRadius()) {}
+
+int main () {
+  FEProblem qip;
+  qip.setRadius(1.0);
+  BoundaryRestrictable br (qip);
+  cout << "Active radius is " << br.getActiveRadius() << endl;
+  qip.setRadius(2.0);
+  cout << "Active radius is " << br.getActiveRadius() << endl;
+  BoundaryRestrictable brnew (qip);
+  cout << "Active radius is " << brnew.getActiveRadius() << endl;
+
+  // FEProblem * pointQip = &qip;
+
+  // cout << "Radius equals " << pointQip->getRadius() << endl;
+  // if (!pointQip->boundaryRestricted()) {
+  //   cout << "Boundary restrictable? " << pointQip->boundaryRestricted() << endl;
+  //   cout << "Entered if statement." << endl;
+  // }
+  // else {
+  //   cout << "Boundary restrictable? " << pointQip->boundaryRestricted() << endl;
+  //   cout << "Entered else statement." << endl;
+  // }
+
+  return 0;
 }

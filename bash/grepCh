@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "Pattern?"
+read pattern
+grep --include=\*.{C,h} -rn '.' -e $pattern
