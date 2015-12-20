@@ -1,13 +1,14 @@
 #!/bin/bash
 
-STRING=noCondSmallGap_000
-RPSTRING=LargeCondSmallGap_000
+STRING=LFA_different_scaling_in
+# RPSTRING=LargeCondSmallGap_000
 
 # COUNTER=0
 # MAX=50
 
-for i in {00..251}; do
-    mv $STRING$i".silo" $RPSTRING$i".silo" ;
+for i in {2..5}; do
+    # mv $STRING$i".silo" $RPSTRING$i".silo" ;
+    rm $STRING$i".csv"
     done
 
 # until (( COUNTER == 10 || COUNTER == MAX )) ; do

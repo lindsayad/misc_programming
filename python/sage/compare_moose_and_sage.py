@@ -1,0 +1,7 @@
+fig = plt.figure()
+ax = fig.add_subplot(111)
+# ax.plot(xdat,ydat,label='sage')
+ax.plot(xdat,moose_ydat,label='moose')
+ax.legend(loc=0)
+fig.savefig('/home/lindsayad/Pictures/moose.png',format='png')
+plt.close()
