@@ -1,0 +1,62 @@
+\documentclass[11pt]{article}
+
+\usepackage{setspace}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage{graphicx}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2ex plus 0.5ex minus 0.2ex}
+
+\begin{document}
+\onehalfspace
+\textbf{Momma's birthday present, December 2015: An update}
+
+Hi Mom. This is an update to the letter that I wrote last year. I talked a lot last year about the positive and the normative. Well in the past year I've managed to combine them! I'm now conducting all of my research using open source software, and I've never been happier! One of the leaders of the open source movement, Richard Stallman, likes to share this quote from Hillel (who was a Jewish leader in the century before the birth of Christ):
+
+\begin{quotation}
+\textit{If I am not for myself, who will be for me?}
+\textit{If I am only for myself, what am I?}
+\textit{If not now, when?}
+\end{quotation}
+
+All those lines are relevant to me, but the last one in particular helped motivate me to make the switch from proprietary to open source software in the last year even if it meant potentially delaying my graduation because I had to learn a slate of new tools. As last year's letter indicated, I knew I wanted to make the switch at some point, but back then I reasoned that I would wait until I graduated. But that last quote line kept ringing in my ears. If I was willing to wait to switch then, why would I not perhaps find a reason to delay in the future? If not now, when?? As the common saying goes: \textit{there's no time like the present.} So after publishing my paper last February I immediately began looking for open source software alternatives to the primary package I was using: Comsol. Comsol is what people would call a multi-physics simulation package. That's a fancy way of saying that it's capable of solving multiple equations describing different ``physics'' simultaneously. I perused many replacement options, the most prominent of which were OpenFOAM and MOOSE. I spent a good amount of time with each before deciding ultimately that MOOSE would be more flexible and extensible to my research. 
+
+\begin{figure}[htpb]
+    \centering
+        \includegraphics[width=.5\textwidth]{A_bull_moose_animal_mammal.jpg}
+    \caption{A moose!}
+    \label{fig:moose}
+\end{figure}
+
+MOOSE itself is just a framework. I'll get to what it's useful for in a second. But let me say first a little more about what a modeller like me does. A lot of physical phenomena can be described by things called conservation laws. A conservation law in English might look something like this:
+
+\begin{equation}
+  Accumulation + ( (Flow\ out) - (flow\ in) ) + (Sinks - sources) = 0
+  \label{eq:conservation_law_English}
+\end{equation}
+
+Now each of those English phrases is expressed in mathematical language. After transforming from English to math, our conservation law might look something like this:
+
+\begin{equation}
+  \frac{\partial u}{\partial t} + \nabla\cdot\vec{\Gamma} + R_{sink} - R_{source} = 0
+  \label{eq:conservation_law_math}
+\end{equation}
+
+The conservation law written in the above mathematical form is known as a Partial Differential Equation or PDE for short. PDEs are notoriously difficult to solve. Only the very simplest PDEs can be solved analytically, meaning by a human using pen and paper. Most PDEs have no analytical solution. They must be solved numerically or inexactly. These days that's OK because we have these marvelous things called computers! To solve these equations numerically we transform them from their differential form to an algebraic form. Now there are different ways to conduct that transformation. Another word for that transformation is ``discretization.'' Some popular discretizations for space coordinates (the 3D space that we live in) are finite difference, finite volume, and finite element. Finite element is the most general and ultimately the most powerful in my opinion. You can actually deduce the finite volume and finite difference methods by making certain choices in your finite element method. So returning to MOOSE... MOOSE is software that allows a user to discretize physics equations using the finite element method. It is the responsibility of the user (me, Alex) to write down my equations in a form that Moose can read and then feed to an algebraic equation solver. Writing my equations down means writing what are called ``Residual'' and ``Jacobian'' statements. I won't go into what those mean; I think it's enough to know that they exist. When you've written down all the Residual and Jacobian statements to solve your particular problem, you've created what is known in the software world as an ``application.'' I've named my application Zapdos, after the legendary lightning pokemon! I presented Zapdos at the AVS conference in October and got some good chuckles from students of my generation, which made me smile.
+
+\begin{figure}[htpb]
+    \centering
+        \includegraphics[width=.5\textwidth]{zapdos.png}
+    \caption{The legendary lightning Pokemon Zapdos!!!}
+    \label{fig:zapdos}
+\end{figure}
+
+It took me a long time to build Zapdos and even longer until I finally got some meaningful physical results. I started writing Zapdos at the end of March; I didn't get my first results until the end of July! Since July, however, I've been getting neat results at a seemingly exponential growth rate. Dr. Graves said in our most recent phone call that I'm now doing things that no one else has ever done. The initial investment is really starting to pay off. 
+
+I've replaced Comsol with Moose and Zapdos. I've replaced Mathematica with tools called Sage and SciPy. I do document preparation with TeX and presenation preparation with LibreOffice. When I write code (or even this letter to you!), I use a text editor called Emacs. Emacs is a marvelous tool; I can do so many things with it. Since I started using it for coding, my productivity has probably tripled. Making the transition to open source has made me realize that anything can be learned. Open source fosters creativity and curiosity. You can bore down to the core of how anything on your computer works. That's probably my second favorite feature of open source. My favorite is the fact that it's open to the public and collaborative. If I had to describe my political stance, I would describe myself as a libertarian socialist, e.g. private iniative for public good. Anyone can freely make use of any of the projects I'm working on; it's like Wikipedia: literally anyone can benefit form its existence. Making the transition to open source has allowed me to live and breathe my ideals every day. It makes getting up and going to work super easy because I'm doing what I love all day. I'm happy that here at the end of graduate school I've discovered my passion, and I look forward to pursuing my passion for the rest of my work career and beyond (because what I'm doing is not really work, it's play!). Thanks for requesting this letter for a second year in a row Mom because I never tire writing about the open source culture.
+
+Happy birthday and Merry Christmas Mom!
+
+Love, Alex
+
+\end{document}
