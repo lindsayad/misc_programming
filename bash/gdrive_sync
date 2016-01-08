@@ -1,0 +1,7 @@
+GDRIVE_PATH='/home/lindsayad/gdrive'
+
+drive pull -no-clobber -verbose $GDRIVE_PATH/Presentations
+drive pull -no-clobber -verbose $GDRIVE_PATH/Pictures
+drive pull -no-clobber -verbose $GDRIVE_PATH/TextDocuments
+drive pull -no-clobber -verbose $GDRIVE_PATH/Literature
+drive pull -no-clobber -verbose $GDRIVE_PATH/Personal
