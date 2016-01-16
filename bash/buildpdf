@@ -1,12 +1,16 @@
 #!/bin/bash
 
-kill paper.pdf
-latex paper.tex
-bibtex paper.aux
-latex paper.tex
-latex paper.tex
-dvips -P pdf -t letter -o paper.ps paper.dvi #-G0 paper.dvi
-ps2pdf paper.ps
-xdg-open paper.pdf
+# echo -n "Source file? > "
+# read NAME
+NAME="pic_compare_only"
 
-#-interaction nonstopmode 
+# kill $NAME.pdf
+latex $NAME.tex
+# bibtex $NAME.aux
+# latex $NAME.tex
+# latex $NAME.tex
+dvips -P pdf -t letter -o $NAME.ps $NAME.dvi #-G0 $NAME.dvi
+ps2pdf $NAME.ps
+# xdg-open $NAME.pdf
+
+#-interaction nonstopmode

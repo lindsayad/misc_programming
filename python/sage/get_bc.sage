@@ -1,0 +1,3 @@
+re, a, muel, Endot, n, eps, n_gamma, eps_gamma, vth, gammapDotN, mu_e, se_coeff = var('re a muel Endot n eps n_gamma eps_gamma vth gammapDotN mu_e se_coeff')
+eq1 = (1 - re) / (1 + re) * (-(2 * a -1) * muel * Endot * (n * eps - n_gamma * eps_gamma) + 1 / 2 * vth * 5 / 3 * (n * eps - n_gamma * eps_gamma)) - (1 - a) * 5 / 3 * eps_gamma * se_coeff * gammapDotN
+eq2 = eq1.substitute(n_gamma = (1 - a) * se_coeff * gammapDotN / (mu_e * Endot)); print eq2.simplify()

@@ -1,22 +1,28 @@
-# from paraview.simple import *
-# import os
-# import numpy as np
-# import matplotlib.pyplot as plt
-# from collections import OrderedDict
+from paraview.simple import *
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from collections import OrderedDict
+from matplotlib import rc
+rc('text', usetex=True)
 
+mpl.rcParams.update({'font.size': 20})
 N_A = 6.02e23
 coulomb = 1.6e-19
 
 # path = "/home/lindsayad/gdrive/MooseOutput/"
-# file_root = "mean_en_"
-# job_names = ["1e6_ballast_resist_solved_to_DC"]
-# short_names = ["1e6_ballast_resist"]
+# file_root = ""
+# job_names = ["LFA_just_plasma_1e6_resist_solved_to_DC", "mean_en_just_plasma_1e6_ballast_resist_solved_to_DC!!!"]
+# short_names = ["LFA", "mean en"]
 # name_dict = {x:y for x,y in zip(job_names, short_names)}
 
 # data = OrderedDict()
 # cellData = OrderedDict()
 # cellGasData = OrderedDict()
 # cellLiquidData = OrderedDict()
+# pointGasData = OrderedDict()
+# pointLiquidData = OrderedDict()
 # index = 0
 # GasElemMax = 0
 # for job in job_names:
@@ -27,17 +33,22 @@ coulomb = 1.6e-19
 #     reader = ExodusIIReader(FileName=inp)
 #     tsteps = reader.TimestepValues
 #     writer = CreateWriter(out, reader)
+#     writer.Precision = 16
 #     writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
 #     del writer
 
-#     for i in range(2,6):
-#         os.remove(file_sans_ext + str(i) + ".csv")
+#     # for i in range(2,6):
+#     #     os.remove(file_sans_ext + str(i) + ".csv")
 
 #     new_inp0 = file_sans_ext + "0.csv"
 #     data[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
-#     new_inp1 = file_sans_ext + "1.csv"
-#     data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-#     data[job] = np.concatenate((data[job],data1), axis=0)
+#     pointGasData[job] = data[job]
+
+#     # # Use for coupled gas-liquid simulations
+#     # new_inp1 = file_sans_ext + "1.csv"
+#     # data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
+#     # pointLiquidData[job] = data1
+#     # data[job] = np.concatenate((data[job],data1), axis=0)
 
 #     writer = CreateWriter(out, reader)
 #     writer.FieldAssociation = "Cells"
@@ -45,18 +56,28 @@ coulomb = 1.6e-19
 #     writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
 #     del writer
 
-#     for i in range(2,6):
-#         os.remove(file_sans_ext + str(i) + ".csv")
+#     # for i in range(2,6):
+#     #     os.remove(file_sans_ext + str(i) + ".csv")
 
 #     new_inp0 = file_sans_ext + "0.csv"
 #     cellData[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
 #     cellGasData[job] = cellData[job]
 #     if index == 0:
 #         GasElemMax = np.amax(cellData[job]['GlobalElementId'])
-#     new_inp1 = file_sans_ext + "1.csv"
-#     data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-#     cellData[job] = np.concatenate((cellData[job],data1), axis=0)
-#     cellLiquidData[job] = data1
+
+#     # # Use for coupled gas-liquid simulations
+#     # new_inp1 = file_sans_ext + "1.csv"
+#     # data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
+#     # cellData[job] = np.concatenate((cellData[job],data1), axis=0)
+#     # cellLiquidData[job] = data1
+
+# Emi data
+emi_path = "/home/lindsayad/gdrive/TabularData/emi_data/gas_only/"
+emi_x, emi_n_e = np.loadtxt(emi_path + "ne_vs_x.txt", unpack = True)
+emi_x, emi_n_i = np.loadtxt(emi_path + "ni_vs_x.txt", unpack = True)
+emi_x, emi_pot = np.loadtxt(emi_path + "Potential_vs_x.txt", unpack = True)
+emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
+emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
 
 # plot_vars = ['potential']
 # for var in plot_vars:
@@ -75,7 +96,7 @@ coulomb = 1.6e-19
 #     # fig.set_size_inches((10,9))
 #     ax.legend(loc=0)
 #     fig.tight_layout()
-#     fig.savefig('/home/lindsayad/Pictures/' + var + '_coupled.pdf',format='pdf')
+#     # fig.savefig('/home/lindsayad/Pictures/' + var + '_coupled.pdf',format='pdf')
 # plt.show()
 
 # cell_plot_vars = ['Arp_lin','em_lin']
@@ -99,6 +120,7 @@ coulomb = 1.6e-19
 #     fig.savefig('/home/lindsayad/Pictures/' + var + '_coupled.pdf',format='pdf')
 # plt.show()
 
+# # Plot of EField. Whole domain
 # fig = plt.figure(figsize=(10., 5.), dpi = 80)
 # plt.subplots_adjust(wspace=0.1)
 # ax1 = plt.subplot(121)
@@ -125,9 +147,64 @@ coulomb = 1.6e-19
 #     ax2.set_ylabel('Electric field (kV/m)')
 #     ax2.set_xlim(1e-3 - 10e-9, 1e-3 + 100e-9 + 10e-9)
 # # fig.tight_layout()
-# fig.savefig('/home/lindsayad/Pictures/Efield.png', format='png')
-# # plt.show()
+# fig.savefig('/home/lindsayad/Pictures/Efield_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/Efield_grad_Te_zero.eps', format='eps')
+# plt.show()
 
+# # Plot of potential. Whole domain
+# fig = plt.figure(figsize=(12., 5.), dpi = 80)
+# plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
+# ax1 = plt.subplot(121)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = 'potential gas', linewidth=2)
+#     ax1.set_ylim(-0.7,0)
+#     ax1.set_xlim(0, 0.001)
+#     ax1.legend(loc=0)
+#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+#     ax1.set_xticklabels(['0','250', '500', '750'])
+#     ax1.set_xlabel('Distance from cathode (microns)')
+#     ax1.set_ylabel('Potential (kV)')
+#     # fig.tight_layout()
+#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
+# ax2 = plt.subplot(122)
+# # ax2 = plt.subplot(122, sharey=ax1)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax2.plot(pointLiquidData[job]['Points0'], pointLiquidData[job]['potential'], label = 'potential liquid', linewidth=2)
+#     ax2.legend(loc=0)
+#     ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
+#     ax2.set_xticklabels(['25', '50', '75', '100'])
+#     ax2.set_xlabel('Distance from interface (nm)')
+#     ax2.yaxis.tick_right()
+#     ax2.yaxis.set_label_position("right")
+#     ax2.set_ylabel('Potential (kV)')
+#     # ax2.set_ylim(-0.7, 0)
+# # fig.tight_layout()
+# fig.savefig('/home/lindsayad/Pictures/potential_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/potential_grad_Te_zero.eps', format='eps')
+# plt.show()
+
+# # Plot of potential. Last bit of gas
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = 'potential gas', linewidth=2)
+#     ax1.set_ylim(-0.05,0)
+#     ax1.set_xlim(0.000999, 0.001)
+#     ax1.legend(loc=0)
+#     # ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+#     # ax1.set_xticklabels(['0','250', '500', '750'])
+#     ax1.set_xlabel('Distance from cathode (microns)')
+#     ax1.set_ylabel('Potential (kV)')
+#     # fig.tight_layout()
+#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/potential_last_bit_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/potential_last_bit_grad_Te_zero.eps', format='eps')
+# plt.show()
+
+# # Plot of densities. Whole gas-liquid domain
 # fig = plt.figure(figsize=(10., 5.), dpi = 80)
 # plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
 # ax1 = plt.subplot(121)
@@ -135,12 +212,12 @@ coulomb = 1.6e-19
 #     job_for_tex = job.replace("_"," ")
 #     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = 'em_lin gas', linewidth=2)
 #     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = 'Arp_lin gas', linewidth=2)
-#     ax1.set_ylim(0,7e18)
+#     ax1.set_ylim(0,7e19)
 #     ax1.legend(loc=0)
 #     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
 #     ax1.set_xticklabels(['0','250', '500', '750'])
 #     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('Density (m$^{-3}$) x 10$^{18}$')
+#     ax1.set_ylabel('Density (m$^{-3}$) x 10$^{19}$')
 #     # fig.tight_layout()
 #     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
 # ax2 = plt.subplot(122)
@@ -157,43 +234,171 @@ coulomb = 1.6e-19
 #     ax2.yaxis.set_label_position("right")
 #     ax2.set_ylabel('Density (m$^{-3}$) x 10$^{22}$')
 # # fig.tight_layout()
-# fig.savefig('/home/lindsayad/Pictures/densities.png', format='png')
-# # plt.show()
+# fig.savefig('/home/lindsayad/Pictures/densities_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/densities_grad_Te_zero.eps', format='eps')
+# plt.show()
 
-fig = plt.figure(figsize=(10., 5.), dpi = 80)
-plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
-ax1 = plt.subplot(121)
-for job in job_names:
-    job_for_tex = job.replace("_"," ")
-    ax1.plot(cellGasData[job]['x'], cellGasData[job]['EFieldAdvAux_em'] * N_A, label = 'Gas advective', linewidth=2)
-    ax1.plot(cellGasData[job]['x'], cellGasData[job]['DiffusiveFlux_em'] * N_A, 'r-', label = 'Gas diffusive', linewidth=2)
-    ax1.plot(cellGasData[job]['x'], cellGasData[job]['Current_em'] / -1.6e-19, 'g-', label = 'Gas total', linewidth=2)
-    ax1.set_ylim(-1e22,1e22)
-    ax1.legend(loc=0)
-    ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-    ax1.set_xticklabels(['0','250', '500', '750'])
-    ax1.set_xlabel('Distance from cathode (microns)')
-    # ax1.set_ylabel('Density (m$^{-3}$) x 10$^{18}$')
-    # fig.tight_layout()
-    # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
-ax2 = plt.subplot(122)
-# ax2 = plt.subplot(122, sharey=ax1)
-for job in job_names:
-    job_for_tex = job.replace("_"," ")
-    ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['EFieldAdvAux_em'] * N_A, label = 'Liquid advective', linewidth=2)
-    ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['DiffusiveFlux_em'] * N_A, 'r-', label = 'Liquid diffusive', linewidth=2)
-    ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['Current_em'] / -1.6e-19, 'g-', label = 'Liquid total', linewidth=2)
-    ax2.legend(loc=0)
-    ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
-    ax2.set_xticklabels(['25', '50', '75', '100'])
-    ax2.set_xlabel('Distance from interface (nm)')
-    ax2.yaxis.tick_right()
-    ax2.yaxis.set_label_position("right")
-    ax2.set_ylim(-1e22,1e22)
-    # ax2.set_ylabel('Density (m$^{-3}$) x 10$^{22}$')
-# fig.tight_layout()
-# fig.savefig('/home/lindsayad/Pictures/densities.png', format='png')
+# # Plot of densities. Whole gas domain
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job] + " em", linewidth=2)
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = name_dict[job] + " Arp", linewidth=2)
+#     # ax1.set_ylim(0,7e19)
+# ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+# ax1.set_xticklabels(['0','250', '500', '750'])
+# ax1.set_xlabel('Distance from cathode (microns)')
+# ax1.set_ylabel('Densities (m$^{-3}$)')
+# ax1.plot(emi_x, emi_n_e, label = "PIC em", linewidth = 2)
+# ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
+# ax1.legend(loc=0)
+# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_densities_compare.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_densities_compare.eps', format='eps')
+# plt.show()
+
+# # Plot of densities. Last bit of gas phase
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = 'em_lin gas', linewidth=2)
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = 'Arp_lin gas', linewidth=2)
+#     # ax1.set_ylim(0,7e18)
+#     ax1.set_xlim(0.00098, 0.001)
+#     ax1.legend(loc=0)
+#     ax1.set_xlabel('Distance from cathode (microns)')
+#     ax1.set_ylabel('Density (m$^{-3}$)')
+#     ax1.set_yscale('log')
+# fig.savefig('/home/lindsayad/Pictures/densities_gas_interface_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/densities_gas_interface_grad_Te_zero.eps', format='eps')
+# plt.show()
+
+# # Plot of potential. Whole gas domain
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = name_dict[job] + " pot", linewidth=2)
+#     # ax1.set_ylim(0,7e19)
+# ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+# ax1.set_xticklabels(['0','250', '500', '750'])
+# ax1.set_xlabel('Distance from cathode (microns)')
+# ax1.set_ylabel('Potential (kV)')
+# ax1.plot(emi_x, emi_pot / 1000, label = "PIC pot", linewidth = 2)
+# ax1.legend(loc=0)
+# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_potential_compare.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_potential_compare.eps', format='eps')
+# plt.show()
+
+# # Plot of e fields. Whole gas domain
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Efield'], label = name_dict[job] + " E field", linewidth=2)
+#     # ax1.set_ylim(0,7e19)
+# ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+# ax1.set_xticklabels(['0','250', '500', '750'])
+# ax1.set_xlabel('Distance from cathode (microns)')
+# ax1.set_ylabel('Electric field (kV/m)')
+# ax1.plot(emi_x, emi_efield / 1000, label = "PIC E field", linewidth = 2)
+# ax1.legend(loc=0)
+# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_efield_compare.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_efield_compare.eps', format='eps')
+# plt.show()
+
+# Plot of e temp. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+ax1.plot(pointGasData[job]['Points0'], pointGasData['mean_en_just_plasma_1e6_ballast_resist_solved_to_DC!!!']['e_temp'], label = "mean en" + " em temp", linewidth=2)
+ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+ax1.set_xticklabels(['0','250', '500', '750'])
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Electron temperature (V)')
+ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+ax1.legend(loc=0)
+fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_etemp_compare.pdf', format='pdf')
+fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_etemp_compare.eps', format='eps')
 plt.show()
+
+# # Plot of fluxes. Whole domain
+# fig = plt.figure(figsize=(10., 5.), dpi = 80)
+# plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
+# ax1 = plt.subplot(121)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['EFieldAdvAux_em'], label = 'Gas advective', linewidth=2)
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['DiffusiveFlux_em'], 'r-', label = 'Gas diffusive', linewidth=2)
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Current_em'] / -1.6e-19, 'g-', label = 'Gas total', linewidth=2)
+#     ax1.set_ylim(-1e23,1e23)
+#     ax1.legend(loc=0)
+#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+#     ax1.set_xticklabels(['0','250', '500', '750'])
+#     ax1.set_xlabel('Distance from cathode (microns)')
+#     # ax1.set_ylabel('Density (m$^{-3}$) x 10$^{18}$')
+#     # fig.tight_layout()
+#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
+# ax2 = plt.subplot(122)
+# # ax2 = plt.subplot(122, sharey=ax1)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['EFieldAdvAux_em'], label = 'Liquid advective', linewidth=2)
+#     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['DiffusiveFlux_em'], 'r-', label = 'Liquid diffusive', linewidth=2)
+#     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['Current_em'] / -1.6e-19, 'g-', label = 'Liquid total', linewidth=2)
+#     ax2.legend(loc=0)
+#     ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
+#     ax2.set_xticklabels(['25', '50', '75', '100'])
+#     ax2.set_xlabel('Distance from interface (nm)')
+#     ax2.yaxis.tick_right()
+#     ax2.yaxis.set_label_position("right")
+#     ax2.set_ylim(-1e23,1e23)
+#     # ax2.set_ylabel('Density (m$^{-3}$) x 10$^{22}$')
+# # fig.tight_layout()
+# fig.savefig('/home/lindsayad/Pictures/fluxes_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/fluxes_grad_Te_zero.eps', format='eps')
+# plt.show()
+
+# # Plot of fluxes. Last bit of gas phase
+# # fig = plt.figure(figsize=(10., 5.), dpi = 80)
+# fig = plt.figure()
+# # plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
+# ax1 = fig.add_subplot(111)
+# # ax1 = plt.subplot(121)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['EFieldAdvAux_em'], label = 'Gas advective', linewidth=2)
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['DiffusiveFlux_em'], 'r-', label = 'Gas diffusive', linewidth=2)
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Current_em'] / -1.6e-19, 'g-', label = 'Gas total', linewidth=2)
+#     # ax1.set_ylim(-1e22,1e22)
+#     ax1.set_xlim(0.000999, 0.001)
+#     ax1.legend(loc=0)
+#     # ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+#     # ax1.set_xticklabels(['0','250', '500', '750'])
+#     ax1.set_xlabel('Distance from cathode (microns)')
+#     # ax1.set_ylabel('Density (m$^{-3}$) x 10$^{18}$')
+#     # fig.tight_layout()
+#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/fluxes_inset_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/fluxes_inset_grad_Te_zero.eps', format='eps')
+# plt.show()
+
+# # Plot of electron temperature
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['e_temp'], label = 'T_e gas', linewidth=2)
+#     ax1.set_ylim(0, 6.0)
+#     ax1.set_xlim(0, 0.001)
+#     ax1.legend(loc=0)
+#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
+#     ax1.set_xticklabels(['0','250', '500', '750'])
+#     ax1.set_xlabel('Distance from cathode (microns)')
+#     ax1.set_ylabel('T_e (eV)')
+# fig.savefig('/home/lindsayad/Pictures/e_temp_grad_Te_zero.pdf', format='pdf')
+# fig.savefig('/home/lindsayad/Pictures/e_temp_grad_Te_zero.eps', format='eps')
+# plt.show()
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111)
