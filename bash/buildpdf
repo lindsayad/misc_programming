@@ -2,13 +2,13 @@
 
 # echo -n "Source file? > "
 # read NAME
-NAME="pic_compare_only"
+NAME="intro_zap_paper"
 
 # kill $NAME.pdf
 latex $NAME.tex
-# bibtex $NAME.aux
-# latex $NAME.tex
-# latex $NAME.tex
+bibtex $NAME.aux
+latex $NAME.tex
+latex $NAME.tex
 dvips -P pdf -t letter -o $NAME.ps $NAME.dvi #-G0 $NAME.dvi
 ps2pdf $NAME.ps
 # xdg-open $NAME.pdf
