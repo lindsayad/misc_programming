@@ -2,7 +2,7 @@
 
 # echo -n "Source file? > "
 # read NAME
-NAME="intro_zap_paper"
+NAME="plasliq_paper"
 
 # kill $NAME.pdf
 latex $NAME.tex
