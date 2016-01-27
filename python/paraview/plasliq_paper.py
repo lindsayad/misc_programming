@@ -12,8 +12,8 @@ N_A = 6.02e23
 coulomb = 1.6e-19
 
 path = "/home/lindsayad/gdrive/MooseOutput/"
-file_root = "mean_en_just_plas_r_0"
-job_names = ["", "pt9", "pt99", "pt999", "pt9999"]
+file_root = "mean_en_kinetic_r_0"
+job_names = ["_no_salt_or_H3Op", "pt9_no_salt_or_H3Op", "pt99_no_salt_or_H3Op", "pt999_no_salt_or_H3Op", "pt9999_no_salt_or_H3Op"]
 short_names = ["$\gamma=1$", "$\gamma=10^{-1}$", "$\gamma=10^{-2}$", "$\gamma=10^{-3}$", "$\gamma=10^{-4}$"]
 name_dict = {x:y for x,y in zip(job_names, short_names)}
 xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
@@ -39,18 +39,18 @@ for job in job_names:
     writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
     del writer
 
-    # for i in range(2,6):
-    #     os.remove(file_sans_ext + str(i) + ".csv")
+    for i in range(2,6):
+        os.remove(file_sans_ext + str(i) + ".csv")
 
     new_inp0 = file_sans_ext + "0.csv"
     data[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
     pointGasData[job] = data[job]
 
-    # # Use for coupled gas-liquid simulations
-    # new_inp1 = file_sans_ext + "1.csv"
-    # data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-    # pointLiquidData[job] = data1
-    # data[job] = np.concatenate((data[job],data1), axis=0)
+    # Use for coupled gas-liquid simulations
+    new_inp1 = file_sans_ext + "1.csv"
+    data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
+    pointLiquidData[job] = data1
+    data[job] = np.concatenate((data[job],data1), axis=0)
 
     writer = CreateWriter(out, reader)
     writer.FieldAssociation = "Cells"
@@ -58,8 +58,8 @@ for job in job_names:
     writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
     del writer
 
-    # for i in range(2,6):
-    #     os.remove(file_sans_ext + str(i) + ".csv")
+    for i in range(2,6):
+        os.remove(file_sans_ext + str(i) + ".csv")
 
     new_inp0 = file_sans_ext + "0.csv"
     cellData[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
@@ -67,11 +67,11 @@ for job in job_names:
     if index == 0:
         GasElemMax = np.amax(cellData[job]['GlobalElementId'])
 
-    # # Use for coupled gas-liquid simulations
-    # new_inp1 = file_sans_ext + "1.csv"
-    # data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-    # cellData[job] = np.concatenate((cellData[job],data1), axis=0)
-    # cellLiquidData[job] = data1
+    # Use for coupled gas-liquid simulations
+    new_inp1 = file_sans_ext + "1.csv"
+    data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
+    cellData[job] = np.concatenate((cellData[job],data1), axis=0)
+    cellLiquidData[job] = data1
 
 # # Emi data
 # emi_path = "/home/lindsayad/gdrive/TabularData/emi_data/gas_only/"
@@ -206,79 +206,78 @@ for job in job_names:
 # fig.savefig('/home/lindsayad/Pictures/potential_last_bit_grad_Te_zero.eps', format='eps')
 # plt.show()
 
-# # Plot of densities. Whole gas-liquid domain
-# fig = plt.figure(figsize=(10., 5.), dpi = 80)
-# plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
-# ax1 = plt.subplot(121)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = 'em_lin gas', linewidth=2)
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = 'Arp_lin gas', linewidth=2)
-#     ax1.set_ylim(0,7e19)
-#     ax1.legend(loc=0)
-#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-#     ax1.set_xticklabels(['0','250', '500', '750'])
-#     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('Density (m$^{-3}$) x 10$^{19}$')
-#     # fig.tight_layout()
-#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
-# ax2 = plt.subplot(122)
-# # ax2 = plt.subplot(122, sharey=ax1)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['em_lin'], label = 'em_lin liquid', linewidth=2)
-#     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['OHm_lin'], 'r-', label = 'OHm_lin liquid', linewidth=2)
-#     ax2.legend(loc=0)
-#     ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
-#     ax2.set_xticklabels(['25', '50', '75', '100'])
-#     ax2.set_xlabel('Distance from interface (nm)')
-#     ax2.yaxis.tick_right()
-#     ax2.yaxis.set_label_position("right")
-#     ax2.set_ylabel('Density (m$^{-3}$) x 10$^{22}$')
-# # fig.tight_layout()
-# fig.savefig('/home/lindsayad/Pictures/densities_grad_Te_zero.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/densities_grad_Te_zero.eps', format='eps')
-# plt.show()
-
-# Plot of ion densities. Whole gas domain
-fig = plt.figure()
-ax1 = plt.subplot(111)
-for job in job_names:
-    job_for_tex = job.replace("_"," ")
-    ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = name_dict[job], linewidth=2)
-    # ax1.set_ylim(0,7e19)
-ax1.set_xticks(xtickers)
-ax1.set_xticklabels(xticker_labels)
-ax1.set_xlabel('Distance from cathode (microns)')
-ax1.set_ylabel('Ion Density (m$^{-3}$)')
-# ax1.plot(emi_x, e mi_n_e, label = "PIC em", linewidth = 2)
-# ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
-ax1.legend(loc=0)
-ax1.set_yscale('log')
-ax1.set_ylim(bottom=1e15)
-ax1.set_xlim(-.1e-3,1.1e-3)
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_densities_compare.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_densities_compare.eps', format='eps')
-plt.show()
-
-# Plot of electron densities. Whole gas domain
-fig = plt.figure()
-ax1 = plt.subplot(111)
+# Plot of densities. Whole gas-liquid domain
+fig = plt.figure(figsize=(10., 5.), dpi = 80)
+plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
+ax1 = plt.subplot(121)
 for job in job_names:
     job_for_tex = job.replace("_"," ")
     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
-ax1.set_xticks(xtickers)
-ax1.set_xticklabels(xticker_labels)
-ax1.set_xlabel('Distance from cathode (microns)')
-ax1.set_ylabel('Electron Density (m$^{-3}$)')
-# ax1.plot(emi_x, e mi_n_e, label = "PIC em", linewidth = 2)
-# ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
-ax1.legend(loc='upper left')
-ax1.set_yscale('log')
-ax1.set_xlim(-.1e-3,1.1e-3)
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_densities_compare.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_densities_compare.eps', format='eps')
+    # ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = 'Arp_lin gas', linewidth=2)
+    # ax1.set_ylim(0,7e19)
+    ax1.set_yscale('log')
+    ax1.legend(loc='upper left', fontsize = 16)
+    ax1.set_xticks(xtickers)
+    ax1.set_xticklabels(xticker_labels)
+    ax1.set_xlabel('Distance from cathode ($\mu m$)')
+    ax1.set_ylabel('Gas Electron Density (m$^{-3}$)')
+    # fig.tight_layout()
+    # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
+ax2 = plt.subplot(122)
+# ax2 = plt.subplot(122, sharey=ax1)
+for job in job_names:
+    job_for_tex = job.replace("_"," ")
+    ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['emliq_lin'], label = name_dict[job], linewidth=2)
+    # ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['OHm_lin'], 'r-', label = 'OHm_lin liquid', linewidth=2)
+    ax2.legend(loc=0, fontsize = 16)
+    ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
+    ax2.set_xticklabels(['25', '50', '75', '100'])
+    ax2.set_xlabel('Distance from interface ($nm$)')
+    ax2.yaxis.tick_right()
+    ax2.yaxis.set_label_position("right")
+    ax2.set_ylabel('Liquid Electron Density (m$^{-3}$)')
+    ax2.set_yscale('log')
+# fig.tight_layout()
+fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full.eps', format='eps')
 plt.show()
+
+# # Plot of ion densities. Whole gas domain
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = name_dict[job], linewidth=2)
+#     # ax1.set_ylim(0,7e19)
+# ax1.set_xticks(xtickers)
+# ax1.set_xticklabels(xticker_labels)
+# ax1.set_xlabel('Distance from cathode (microns)')
+# ax1.set_ylabel('Ion Density (m$^{-3}$)')
+# # ax1.plot(emi_x, e mi_n_e, label = "PIC em", linewidth = 2)
+# # ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
+# ax1.legend(loc=0)
+# ax1.set_yscale('log')
+# ax1.set_ylim(bottom=1e15)
+# ax1.set_xlim(-.1e-3,1.1e-3)
+# fig.savefig('/home/lindsayad/Pictures/gas_only_gamma_sweep_ions.eps', format='eps')
+# plt.show()
+
+# # Plot of electron densities. Whole gas domain
+# fig = plt.figure()
+# ax1 = plt.subplot(111)
+# for job in job_names:
+#     job_for_tex = job.replace("_"," ")
+#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
+# ax1.set_xticks(xtickers)
+# ax1.set_xticklabels(xticker_labels)
+# ax1.set_xlabel('Distance from cathode (microns)')
+# ax1.set_ylabel('Electron Density (m$^{-3}$)')
+# # ax1.plot(emi_x, e mi_n_e, label = "PIC em", linewidth = 2)
+# # ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
+# ax1.legend(loc='upper left')
+# ax1.set_yscale('log')
+# ax1.set_xlim(-.1e-3,1.1e-3)
+# fig.savefig('/home/lindsayad/Pictures/gas_only_gamma_sweep_electrons.eps', format='eps')
+# plt.show()
 
 # # Plot of densities. Last bit of gas phase
 # fig = plt.figure()
