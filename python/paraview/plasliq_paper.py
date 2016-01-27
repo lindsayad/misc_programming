@@ -12,9 +12,31 @@ N_A = 6.02e23
 coulomb = 1.6e-19
 
 path = "/home/lindsayad/gdrive/MooseOutput/"
-file_root = "mean_en_kinetic_r_0"
-job_names = ["_no_salt_or_H3Op", "pt9_no_salt_or_H3Op", "pt99_no_salt_or_H3Op", "pt999_no_salt_or_H3Op", "pt9999_no_salt_or_H3Op"]
-short_names = ["$\gamma=1$", "$\gamma=10^{-1}$", "$\gamma=10^{-2}$", "$\gamma=10^{-3}$", "$\gamma=10^{-4}$"]
+pic_path = "/home/lindsayad/gdrive/Pictures/"
+PIC = False
+save = False
+mode = "thermo"
+
+if mode == "kinetic":
+    # Files for kinetic plots
+    file_root = "mean_en_kinetic_r_0"
+    job_names = ["_no_salt_or_H3Op", "pt9_no_salt_or_H3Op", "pt99_no_salt_or_H3Op", "pt999_no_salt_or_H3Op", "pt9999_no_salt_or_H3Op"]
+    short_names = ["$\gamma=1$", "$\gamma=10^{-1}$", "$\gamma=10^{-2}$", "$\gamma=10^{-3}$", "$\gamma=10^{-4}$"]
+
+elif mode == "energybc":
+    # Files for energy bc plot. Comparison of energy BCs for H = 1
+    file_root = "mean_en_thermo_no_salt_or_H3Op_H_1"
+    job_names = ["_Hagelaar_energy", "_zero_grad_mean_en"]
+    short_names = ["vacuum", "zero grad"]
+
+elif mode == "thermo":
+    # Files for thermo plot. Comparison of different values of H
+    file_root = "mean_en_thermo_no_salt_or_H3Op_H_"
+    suffix = "_zero_grad_mean_en"
+    job_names = ["1", "10", "100", "1000", "10000", "100000"]
+    short_names = ["H = 1", "H = 1e1", "H = 1e2", "H = 1e3", "H = 1e4", "H = 1e5"]
+    job_names = [job + suffix for job in job_names]
+
 name_dict = {x:y for x,y in zip(job_names, short_names)}
 xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
 xticker_labels = ['0','250', '500', '750', '1000']
@@ -206,39 +228,55 @@ for job in job_names:
 # fig.savefig('/home/lindsayad/Pictures/potential_last_bit_grad_Te_zero.eps', format='eps')
 # plt.show()
 
-# Plot of densities. Whole gas-liquid domain
+# Plot of electron densities. Whole gas-liquid domain
 fig = plt.figure(figsize=(10., 5.), dpi = 80)
 plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
 ax1 = plt.subplot(121)
 for job in job_names:
-    job_for_tex = job.replace("_"," ")
     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
-    # ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = 'Arp_lin gas', linewidth=2)
-    # ax1.set_ylim(0,7e19)
-    ax1.set_yscale('log')
-    ax1.legend(loc='upper left', fontsize = 16)
-    ax1.set_xticks(xtickers)
-    ax1.set_xticklabels(xticker_labels)
-    ax1.set_xlabel('Distance from cathode ($\mu m$)')
-    ax1.set_ylabel('Gas Electron Density (m$^{-3}$)')
-    # fig.tight_layout()
-    # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
+ax1.set_yscale('log')
+ax1.legend(loc='upper left', fontsize = 16)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode ($\mu m$)')
+ax1.set_ylabel('Gas Electron Density (m$^{-3}$)')
 ax2 = plt.subplot(122)
-# ax2 = plt.subplot(122, sharey=ax1)
 for job in job_names:
-    job_for_tex = job.replace("_"," ")
     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['emliq_lin'], label = name_dict[job], linewidth=2)
-    # ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['OHm_lin'], 'r-', label = 'OHm_lin liquid', linewidth=2)
-    ax2.legend(loc=0, fontsize = 16)
-    ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
-    ax2.set_xticklabels(['25', '50', '75', '100'])
-    ax2.set_xlabel('Distance from interface ($nm$)')
-    ax2.yaxis.tick_right()
-    ax2.yaxis.set_label_position("right")
-    ax2.set_ylabel('Liquid Electron Density (m$^{-3}$)')
-    ax2.set_yscale('log')
-# fig.tight_layout()
-fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full.eps', format='eps')
+ax2.legend(loc=0, fontsize = 16)
+ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
+ax2.set_xticklabels(['25', '50', '75', '100'])
+ax2.set_xlabel('Distance from interface ($nm$)')
+ax2.yaxis.tick_right()
+ax2.yaxis.set_label_position("right")
+ax2.set_ylabel('Liquid Electron Density (m$^{-3}$)')
+ax2.set_yscale('log')
+if save:
+    if mode == "kinetic":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_kinetic.eps', format='eps')
+    elif mode == "energybc":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_energy_bc.eps', format='eps')
+    elif mode == "thermo":
+        fig.savefig(pic_path + "plasliq_electron_density_full_thermo.eps", format='eps')
+plt.show()
+
+# Plot of ion density. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = name_dict[job], linewidth=2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode ($\mu m$)')
+ax1.set_ylabel('Gas Ion Density (m$^{-3}$)')
+if save:
+    if mode == "kinetic":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_ion_density_full_kinetic.eps', format='eps')
+    elif mode == "energybc":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_ion_density_full_energy_bc.eps', format='eps')
+    elif mode == "thermo":
+        fig.savefig(pic_path + "plasliq_ion_density_thermo.eps", format='eps')
 plt.show()
 
 # # Plot of ion densities. Whole gas domain
@@ -296,22 +334,27 @@ plt.show()
 # fig.savefig('/home/lindsayad/Pictures/densities_gas_interface_grad_Te_zero.eps', format='eps')
 # plt.show()
 
-# # Plot of potential. Whole gas domain
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = name_dict[job] + " pot", linewidth=2)
-#     # ax1.set_ylim(0,7e19)
-# ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-# ax1.set_xticklabels(['0','250', '500', '750'])
-# ax1.set_xlabel('Distance from cathode (microns)')
-# ax1.set_ylabel('Potential (kV)')
-# ax1.plot(emi_x, emi_pot / 1000, label = "PIC pot", linewidth = 2)
-# ax1.legend(loc=0)
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_potential_compare.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_potential_compare.eps', format='eps')
-# plt.show()
+# Plot of potential. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = name_dict[job], linewidth=2)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Potential (kV)')
+if PIC:
+    ax1.plot(emi_x, emi_pot / 1000, label = "PIC pot", linewidth = 2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xlim(-.1e-3, 1.1e-3)
+if save:
+    if mode == "kinetic":
+        fig.savefig(pic_path + "plasliq_potential_kinetic.eps", format = 'eps')
+    elif mode == "energybc":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_potential_thermo_energy_bc.eps', format='eps')
+    elif mode == "thermo":
+        fig.savefig(pic_path + "plasliq_potential_thermo.eps", format='eps')
+plt.show()
 
 # # Plot of e fields. Whole gas domain
 # fig = plt.figure()
@@ -330,19 +373,27 @@ plt.show()
 # fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_efield_compare.eps', format='eps')
 # plt.show()
 
-# # Plot of e temp. Whole gas domain
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# ax1.plot(pointGasData[job]['Points0'], pointGasData['mean_en_just_plasma_1e6_ballast_resist_solved_to_DC!!!']['e_temp'], label = "mean en" + " em temp", linewidth=2)
-# ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-# ax1.set_xticklabels(['0','250', '500', '750'])
-# ax1.set_xlabel('Distance from cathode (microns)')
-# ax1.set_ylabel('Electron temperature (V)')
-# ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
-# ax1.legend(loc=0)
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_etemp_compare.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_etemp_compare.eps', format='eps')
-# plt.show()
+# Plot of e temp. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['e_temp'], label = name_dict[job], linewidth=2)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Electron temperature (V)')
+if PIC:
+    ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xlim(-.1e-3, 1.1e-3)
+if save:
+    if mode == "kinetic":
+        fig.savefig(pic_path + "plasliq_e_temp_kinetic.eps", format = 'eps')
+    elif mode == "energybc":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_e_temp_thermo_energy_bc.eps', format='eps')
+    elif mode == "thermo":
+        fig.savefig(pic_path + "plasliq_e_temp_thermo.eps", format='eps')
+plt.show()
 
 # # Plot of fluxes. Whole domain
 # fig = plt.figure(figsize=(10., 5.), dpi = 80)
