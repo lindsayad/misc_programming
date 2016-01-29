@@ -11,6 +11,83 @@ mpl.rcParams.update({'font.size': 20})
 N_A = 6.02e23
 coulomb = 1.6e-19
 
+def load_data():
+    if mode == "kinetic":
+        # Files for kinetic plots
+        file_root = "mean_en_kinetic_r_0"
+        job_names = ["_no_salt_or_H3Op", "pt9_no_salt_or_H3Op", "pt99_no_salt_or_H3Op", "pt999_no_salt_or_H3Op", "pt9999_no_salt_or_H3Op"]
+        short_names = ["$\gamma=1$", "$\gamma=10^{-1}$", "$\gamma=10^{-2}$", "$\gamma=10^{-3}$", "$\gamma=10^{-4}$"]
+
+    elif mode == "energybc":
+        # Files for energy bc plot. Comparison of energy BCs for H = 1
+        file_root = "mean_en_thermo_no_salt_or_H3Op_H_1"
+        job_names = ["_Hagelaar_energy", "_zero_grad_mean_en"]
+        short_names = ["vacuum", "zero grad"]
+
+    elif mode == "thermo":
+        # Files for thermo plot. Comparison of different values of H
+        file_root = "mean_en_thermo_no_salt_or_H3Op_H_"
+        suffix = "_zero_grad_mean_en"
+        job_names = ["1", "10", "100", "1000", "10000", "100000"]
+        short_names = ["H = 1", "H = 1e1", "H = 1e2", "H = 1e3", "H = 1e4", "H = 1e5"]
+        job_names = [job + suffix for job in job_names]
+
+    elif mode == "ion_power_dep":
+        # Files for power deposition and process rates comparison
+        file_root = "mean_en_kinetic_r_0"
+        job_names = ["_no_salt_or_H3Op_correct_mesh", "pt9999_corrected_mesh_has_power_dep_and_proc_rates"]
+        short_names = ["$\gamma=1$", "$\gamma=10^{-4}$"]
+    name_dict = {x:y for x,y in zip(job_names, short_names)}
+
+    index = 0
+    GasElemMax = 0
+    for job in job_names:
+        file_sans_ext = path + file_root + job + "_gold_out"
+        inp = file_sans_ext + ".e"
+        out = file_sans_ext + ".csv"
+
+        reader = ExodusIIReader(FileName=inp)
+        tsteps = reader.TimestepValues
+        writer = CreateWriter(out, reader)
+        writer.Precision = 16
+        writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
+        del writer
+
+        for i in range(2,6):
+            os.remove(file_sans_ext + str(i) + ".csv")
+
+        new_inp0 = file_sans_ext + "0.csv"
+        data[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
+        pointGasData[job] = data[job]
+
+        # Use for coupled gas-liquid simulations
+        new_inp1 = file_sans_ext + "1.csv"
+        data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
+        pointLiquidData[job] = data1
+        data[job] = np.concatenate((data[job],data1), axis=0)
+
+        writer = CreateWriter(out, reader)
+        writer.FieldAssociation = "Cells"
+        writer.Precision = 16
+        writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
+        del writer
+
+        for i in range(2,6):
+            os.remove(file_sans_ext + str(i) + ".csv")
+
+        new_inp0 = file_sans_ext + "0.csv"
+        cellData[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
+        cellGasData[job] = cellData[job]
+        if index == 0:
+            GasElemMax = np.amax(cellData[job]['GlobalElementId'])
+
+        # Use for coupled gas-liquid simulations
+        new_inp1 = file_sans_ext + "1.csv"
+        data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
+        cellData[job] = np.concatenate((cellData[job],data1), axis=0)
+        cellLiquidData[job] = data1
+
+
 def plot_elec_dens_full(save, pmode):
     # Plot of electron densities. Whole gas-liquid domain
     fig = plt.figure(figsize=(10., 5.), dpi = 80)
@@ -290,92 +367,18 @@ def plot_fluxes_last_bit(save, pmode):
 
 path = "/home/lindsayad/gdrive/MooseOutput/"
 pic_path = "/home/lindsayad/gdrive/Pictures/"
-PIC = False
-mode = "kinetic"
-
-if mode == "kinetic":
-    # Files for kinetic plots
-    file_root = "mean_en_kinetic_r_0"
-    job_names = ["_no_salt_or_H3Op", "pt9_no_salt_or_H3Op", "pt99_no_salt_or_H3Op", "pt999_no_salt_or_H3Op", "pt9999_no_salt_or_H3Op"]
-    short_names = ["$\gamma=1$", "$\gamma=10^{-1}$", "$\gamma=10^{-2}$", "$\gamma=10^{-3}$", "$\gamma=10^{-4}$"]
-
-elif mode == "energybc":
-    # Files for energy bc plot. Comparison of energy BCs for H = 1
-    file_root = "mean_en_thermo_no_salt_or_H3Op_H_1"
-    job_names = ["_Hagelaar_energy", "_zero_grad_mean_en"]
-    short_names = ["vacuum", "zero grad"]
-
-elif mode == "thermo":
-    # Files for thermo plot. Comparison of different values of H
-    file_root = "mean_en_thermo_no_salt_or_H3Op_H_"
-    suffix = "_zero_grad_mean_en"
-    job_names = ["1", "10", "100", "1000", "10000", "100000"]
-    short_names = ["H = 1", "H = 1e1", "H = 1e2", "H = 1e3", "H = 1e4", "H = 1e5"]
-    job_names = [job + suffix for job in job_names]
-
-elif mode == "ion_power_dep":
-    # Files for power deposition and process rates comparison
-    file_root = "mean_en_kinetic_r_0"
-    job_names = ["_no_salt_or_H3Op_correct_mesh", "pt9999_corrected_mesh_has_power_dep_and_proc_rates"]
-    short_names = ["$\gamma=1$", "$\gamma=10^{-4}$"]
-
-name_dict = {x:y for x,y in zip(job_names, short_names)}
-xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
-xticker_labels = ['0','250', '500', '750', '1000']
-
+file_root = ""
+job_names = []
+short_names = []
+name_dict = {}
 data = OrderedDict()
 cellData = OrderedDict()
 cellGasData = OrderedDict()
 cellLiquidData = OrderedDict()
 pointGasData = OrderedDict()
 pointLiquidData = OrderedDict()
-index = 0
-GasElemMax = 0
-for job in job_names:
-    file_sans_ext = path + file_root + job + "_gold_out"
-    inp = file_sans_ext + ".e"
-    out = file_sans_ext + ".csv"
-
-    reader = ExodusIIReader(FileName=inp)
-    tsteps = reader.TimestepValues
-    writer = CreateWriter(out, reader)
-    writer.Precision = 16
-    writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
-    del writer
-
-    for i in range(2,6):
-        os.remove(file_sans_ext + str(i) + ".csv")
-
-    new_inp0 = file_sans_ext + "0.csv"
-    data[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
-    pointGasData[job] = data[job]
-
-    # Use for coupled gas-liquid simulations
-    new_inp1 = file_sans_ext + "1.csv"
-    data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-    pointLiquidData[job] = data1
-    data[job] = np.concatenate((data[job],data1), axis=0)
-
-    writer = CreateWriter(out, reader)
-    writer.FieldAssociation = "Cells"
-    writer.Precision = 16
-    writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
-    del writer
-
-    for i in range(2,6):
-        os.remove(file_sans_ext + str(i) + ".csv")
-
-    new_inp0 = file_sans_ext + "0.csv"
-    cellData[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
-    cellGasData[job] = cellData[job]
-    if index == 0:
-        GasElemMax = np.amax(cellData[job]['GlobalElementId'])
-
-    # Use for coupled gas-liquid simulations
-    new_inp1 = file_sans_ext + "1.csv"
-    data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-    cellData[job] = np.concatenate((cellData[job],data1), axis=0)
-    cellLiquidData[job] = data1
+xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
+xticker_labels = ['0','250', '500', '750', '1000']
 
 # Emi data
 emi_path = "/home/lindsayad/gdrive/TabularData/emi_data/gas_only/"
@@ -385,5 +388,9 @@ emi_x, emi_pot = np.loadtxt(emi_path + "Potential_vs_x.txt", unpack = True)
 emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
 emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
 
+PIC = False
+mode = "kinetic"
+
+load_data()
 # plot_elec_dens_full(False, mode)
-plot_ions(True, mode)
+plot_ions(False, mode)
