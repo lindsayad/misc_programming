@@ -14,8 +14,8 @@ coulomb = 1.6e-19
 path = "/home/lindsayad/gdrive/MooseOutput/"
 pic_path = "/home/lindsayad/gdrive/Pictures/"
 PIC = False
-save = False
-mode = "thermo"
+save = True
+mode = "kinetic"
 
 if mode == "kinetic":
     # Files for kinetic plots
@@ -36,6 +36,12 @@ elif mode == "thermo":
     job_names = ["1", "10", "100", "1000", "10000", "100000"]
     short_names = ["H = 1", "H = 1e1", "H = 1e2", "H = 1e3", "H = 1e4", "H = 1e5"]
     job_names = [job + suffix for job in job_names]
+
+elif mode == "ion_power_dep":
+    # Files for power deposition and process rates comparison
+    file_root = "mean_en_kinetic_r_0"
+    job_names = ["_no_salt_or_H3Op_correct_mesh", "pt9999_corrected_mesh_has_power_dep_and_proc_rates"]
+    short_names = ["$\gamma=1$", "$\gamma=10^{-4}$"]
 
 name_dict = {x:y for x,y in zip(job_names, short_names)}
 xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
@@ -103,131 +109,6 @@ for job in job_names:
 # emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
 # emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
 
-# plot_vars = ['potential']
-# for var in plot_vars:
-#     var_for_tex = var.replace("_"," ")
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-#     for job in job_names:
-#         job_for_tex = job.replace("_"," ")
-#         ax.plot(data[job]['Points0'],data[job][var],label=name_dict[job], linewidth=2)
-#     xmin = np.amin(data[job]['Points0'])
-#     xmax = np.amax(data[job]['Points0'])
-#     ax.set_xlabel('x (m)')
-#     ax.set_ylabel(var_for_tex)
-#     ax.set_xlim(-0.1 * (xmax - xmin) + xmin, 0.1 * (xmax - xmin) + xmax)
-#     # ax.legend(loc='upper center',bbox_to_anchor=(0.5,1.1),fancybox=True,shadow=True,fontsize=12,ncol=len(data.keys())/2)
-#     # fig.set_size_inches((10,9))
-#     ax.legend(loc=0)
-#     fig.tight_layout()
-#     # fig.savefig('/home/lindsayad/Pictures/' + var + '_coupled.pdf',format='pdf')
-# plt.show()
-
-# cell_plot_vars = ['Arp_lin','em_lin']
-# for var in cell_plot_vars:
-#     var_for_tex = var.replace("_"," ")
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-#     for job in job_names:
-#         job_for_tex = job.replace("_"," ")
-#         ax.plot(cellData[job]['x'],cellData[job][var],label=name_dict[job], linewidth=2)
-#     xmin = np.amin(cellData[job]['x'])
-#     xmax = np.amax(cellData[job]['x'])
-#     ax.set_xlabel('x (m)')
-#     ax.set_ylabel(var_for_tex)
-#     ax.set_xlim(-0.1 * (xmax - xmin) + xmin, 0.1 * (xmax - xmin) + xmax)
-#     ax.set_yscale('log')
-#     # ax.legend(loc='upper center',bbox_to_anchor=(0.5,1.1),fancybox=True,shadow=True,fontsize=12,ncol=len(cellData.keys())/2)
-#     # fig.set_size_inches((10,9))
-#     ax.legend(loc=0)
-#     fig.tight_layout()
-#     fig.savefig('/home/lindsayad/Pictures/' + var + '_coupled.pdf',format='pdf')
-# plt.show()
-
-# # Plot of EField. Whole domain
-# fig = plt.figure(figsize=(10., 5.), dpi = 80)
-# plt.subplots_adjust(wspace=0.1)
-# ax1 = plt.subplot(121)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Efield'], label = 'Efield gas', linewidth=2)
-#     # ax1.set_ylim(0,7e18)
-#     ax1.legend(loc=0)
-#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3, 1e-3])
-#     ax1.set_xticklabels(['0','250', '500', '750', '1000'])
-#     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('Electric field (kV/m)')
-#     ax1.set_xlim(-.1e-3, 1.1e-3)
-# ax2 = plt.subplot(122)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['Efield'], label = 'Efield liquid', linewidth=2)
-#     ax2.legend(loc=0)
-#     ax2.set_xticks([1e-3, 1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
-#     ax2.set_xticklabels(['0', '25', '50', '75', '100'])
-#     ax2.set_xlabel('Distance from interface (nm)')
-#     ax2.yaxis.tick_right()
-#     ax2.yaxis.set_label_position("right")
-#     ax2.set_ylabel('Electric field (kV/m)')
-#     ax2.set_xlim(1e-3 - 10e-9, 1e-3 + 100e-9 + 10e-9)
-# # fig.tight_layout()
-# fig.savefig('/home/lindsayad/Pictures/Efield_grad_Te_zero.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/Efield_grad_Te_zero.eps', format='eps')
-# plt.show()
-
-# # Plot of potential. Whole domain
-# fig = plt.figure(figsize=(12., 5.), dpi = 80)
-# plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
-# ax1 = plt.subplot(121)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = 'potential gas', linewidth=2)
-#     ax1.set_ylim(-0.7,0)
-#     ax1.set_xlim(0, 0.001)
-#     ax1.legend(loc=0)
-#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-#     ax1.set_xticklabels(['0','250', '500', '750'])
-#     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('Potential (kV)')
-#     # fig.tight_layout()
-#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
-# ax2 = plt.subplot(122)
-# # ax2 = plt.subplot(122, sharey=ax1)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax2.plot(pointLiquidData[job]['Points0'], pointLiquidData[job]['potential'], label = 'potential liquid', linewidth=2)
-#     ax2.legend(loc=0)
-#     ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
-#     ax2.set_xticklabels(['25', '50', '75', '100'])
-#     ax2.set_xlabel('Distance from interface (nm)')
-#     ax2.yaxis.tick_right()
-#     ax2.yaxis.set_label_position("right")
-#     ax2.set_ylabel('Potential (kV)')
-#     # ax2.set_ylim(-0.7, 0)
-# # fig.tight_layout()
-# fig.savefig('/home/lindsayad/Pictures/potential_grad_Te_zero.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/potential_grad_Te_zero.eps', format='eps')
-# plt.show()
-
-# # Plot of potential. Last bit of gas
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = 'potential gas', linewidth=2)
-#     ax1.set_ylim(-0.05,0)
-#     ax1.set_xlim(0.000999, 0.001)
-#     ax1.legend(loc=0)
-#     # ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-#     # ax1.set_xticklabels(['0','250', '500', '750'])
-#     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('Potential (kV)')
-#     # fig.tight_layout()
-#     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/potential_last_bit_grad_Te_zero.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/potential_last_bit_grad_Te_zero.eps', format='eps')
-# plt.show()
-
 # Plot of electron densities. Whole gas-liquid domain
 fig = plt.figure(figsize=(10., 5.), dpi = 80)
 plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
@@ -260,6 +141,36 @@ if save:
         fig.savefig(pic_path + "plasliq_electron_density_full_thermo.eps", format='eps')
 plt.show()
 
+# Plot of currents. Whole gas-liquid domain
+fig = plt.figure(figsize=(10., 5.), dpi = 80)
+plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
+ax1 = plt.subplot(121)
+for job in job_names:
+    ax1.plot(cellGasData[job]['x'], cellGasData[job]['tot_gas_current'], label = name_dict[job], linewidth=2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode ($\mu m$)')
+ax1.set_ylabel('Gas current (A m$^{-2}$)')
+ax2 = plt.subplot(122)
+for job in job_names:
+    ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['tot_liq_current'], label = name_dict[job], linewidth=2)
+ax2.legend(loc=0, fontsize = 16)
+ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
+ax2.set_xticklabels(['25', '50', '75', '100'])
+ax2.set_xlabel('Distance from interface ($nm$)')
+ax2.yaxis.tick_right()
+ax2.yaxis.set_label_position("right")
+ax2.set_ylabel('Liquid Current (A m$^{-2}$)')
+if save:
+    if mode == "kinetic":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_current_full_kinetic.eps', format='eps')
+    elif mode == "energybc":
+        fig.savefig('/home/lindsayad/Pictures/plasliq_current_full_energy_bc.eps', format='eps')
+    elif mode == "thermo":
+        fig.savefig(pic_path + "plasliq_current_full_thermo.eps", format='eps')
+plt.show()
+
 # Plot of ion density. Whole gas domain
 fig = plt.figure()
 ax1 = plt.subplot(111)
@@ -270,6 +181,8 @@ ax1.set_xticks(xtickers)
 ax1.set_xticklabels(xticker_labels)
 ax1.set_xlabel('Distance from cathode ($\mu m$)')
 ax1.set_ylabel('Gas Ion Density (m$^{-3}$)')
+ax1.set_yscale('log')
+ax1.set_ylim(bottom=1e15)
 if save:
     if mode == "kinetic":
         fig.savefig('/home/lindsayad/Pictures/plasliq_ion_density_full_kinetic.eps', format='eps')
@@ -279,99 +192,28 @@ if save:
         fig.savefig(pic_path + "plasliq_ion_density_thermo.eps", format='eps')
 plt.show()
 
-# # Plot of ion densities. Whole gas domain
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = name_dict[job], linewidth=2)
-#     # ax1.set_ylim(0,7e19)
-# ax1.set_xticks(xtickers)
-# ax1.set_xticklabels(xticker_labels)
-# ax1.set_xlabel('Distance from cathode (microns)')
-# ax1.set_ylabel('Ion Density (m$^{-3}$)')
-# # ax1.plot(emi_x, e mi_n_e, label = "PIC em", linewidth = 2)
-# # ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
-# ax1.legend(loc=0)
-# ax1.set_yscale('log')
-# ax1.set_ylim(bottom=1e15)
-# ax1.set_xlim(-.1e-3,1.1e-3)
-# fig.savefig('/home/lindsayad/Pictures/gas_only_gamma_sweep_ions.eps', format='eps')
-# plt.show()
-
-# # Plot of electron densities. Whole gas domain
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
-# ax1.set_xticks(xtickers)
-# ax1.set_xticklabels(xticker_labels)
-# ax1.set_xlabel('Distance from cathode (microns)')
-# ax1.set_ylabel('Electron Density (m$^{-3}$)')
-# # ax1.plot(emi_x, e mi_n_e, label = "PIC em", linewidth = 2)
-# # ax1.plot(emi_x, emi_n_i, label = "PIC Arp", linewidth = 2)
-# ax1.legend(loc='upper left')
-# ax1.set_yscale('log')
-# ax1.set_xlim(-.1e-3,1.1e-3)
-# fig.savefig('/home/lindsayad/Pictures/gas_only_gamma_sweep_electrons.eps', format='eps')
-# plt.show()
-
-# # Plot of densities. Last bit of gas phase
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = 'em_lin gas', linewidth=2)
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = 'Arp_lin gas', linewidth=2)
-#     # ax1.set_ylim(0,7e18)
-#     ax1.set_xlim(0.00098, 0.001)
-#     ax1.legend(loc=0)
-#     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('Density (m$^{-3}$)')
-#     ax1.set_yscale('log')
-# fig.savefig('/home/lindsayad/Pictures/densities_gas_interface_grad_Te_zero.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/densities_gas_interface_grad_Te_zero.eps', format='eps')
-# plt.show()
-
-# Plot of potential. Whole gas domain
-fig = plt.figure()
-ax1 = plt.subplot(111)
-for job in job_names:
-    ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = name_dict[job], linewidth=2)
-ax1.set_xticks(xtickers)
-ax1.set_xticklabels(xticker_labels)
-ax1.set_xlabel('Distance from cathode (microns)')
-ax1.set_ylabel('Potential (kV)')
-if PIC:
-    ax1.plot(emi_x, emi_pot / 1000, label = "PIC pot", linewidth = 2)
-ax1.legend(loc='best', fontsize = 16)
-ax1.set_xlim(-.1e-3, 1.1e-3)
-if save:
-    if mode == "kinetic":
-        fig.savefig(pic_path + "plasliq_potential_kinetic.eps", format = 'eps')
-    elif mode == "energybc":
-        fig.savefig('/home/lindsayad/Pictures/plasliq_potential_thermo_energy_bc.eps', format='eps')
-    elif mode == "thermo":
-        fig.savefig(pic_path + "plasliq_potential_thermo.eps", format='eps')
-plt.show()
-
-# # Plot of e fields. Whole gas domain
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(cellGasData[job]['x'], cellGasData[job]['Efield'], label = name_dict[job] + " E field", linewidth=2)
-#     # ax1.set_ylim(0,7e19)
-# ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-# ax1.set_xticklabels(['0','250', '500', '750'])
-# ax1.set_xlabel('Distance from cathode (microns)')
-# ax1.set_ylabel('Electric field (kV/m)')
-# ax1.plot(emi_x, emi_efield / 1000, label = "PIC E field", linewidth = 2)
-# ax1.legend(loc=0)
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_efield_compare.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/LFA_mean_en_efield_compare.eps', format='eps')
-# plt.show()
+def plot_potential():
+    # Plot of potential. Whole gas domain
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = name_dict[job], linewidth=2)
+    ax1.set_xticks(xtickers)
+    ax1.set_xticklabels(xticker_labels)
+    ax1.set_xlabel('Distance from cathode (microns)')
+    ax1.set_ylabel('Potential (kV)')
+    if PIC:
+        ax1.plot(emi_x, emi_pot / 1000, label = "PIC pot", linewidth = 2)
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xlim(-.1e-3, 1.1e-3)
+    if save:
+        if mode == "kinetic":
+            fig.savefig(pic_path + "plasliq_potential_kinetic.eps", format = 'eps')
+        elif mode == "energybc":
+            fig.savefig('/home/lindsayad/Pictures/plasliq_potential_thermo_energy_bc.eps', format='eps')
+        elif mode == "thermo":
+            fig.savefig(pic_path + "plasliq_potential_thermo.eps", format='eps')
+    plt.show()
 
 # Plot of e temp. Whole gas domain
 fig = plt.figure()
@@ -386,6 +228,7 @@ if PIC:
     ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
 ax1.legend(loc='best', fontsize = 16)
 ax1.set_xlim(-.1e-3, 1.1e-3)
+ax1.set_ylim(bottom = 0)
 if save:
     if mode == "kinetic":
         fig.savefig(pic_path + "plasliq_e_temp_kinetic.eps", format = 'eps')
@@ -393,6 +236,83 @@ if save:
         fig.savefig('/home/lindsayad/Pictures/plasliq_e_temp_thermo_energy_bc.eps', format='eps')
     elif mode == "thermo":
         fig.savefig(pic_path + "plasliq_e_temp_thermo.eps", format='eps')
+plt.show()
+
+# Plot of power deposition in electrons. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    ax1.plot(cellGasData[job]['x'], cellGasData[job]['PowerDep_em'], label = name_dict[job], linewidth=2)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Power Deposition in electron heating (W m$^{-2}$)')
+if PIC:
+    ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xlim(-.1e-3, 1.1e-3)
+ax1.set_ylim(bottom = 0)
+if save:
+    if mode == "ion_power_dep":
+        fig.savefig(pic_path + "plasliq_power_dep_electrons.eps", format = 'eps')
+plt.show()
+
+# Plot of power deposition in ions. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    ax1.plot(cellGasData[job]['x'], cellGasData[job]['PowerDep_Arp'], label = name_dict[job], linewidth=2)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Power Deposition in ion heating (W m$^{-2}$)')
+if PIC:
+    ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xlim(-.1e-3, 1.1e-3)
+ax1.set_ylim(bottom = 0)
+if save:
+    if mode == "ion_power_dep":
+        fig.savefig(pic_path + "plasliq_power_dep_ions.eps", format = 'eps')
+plt.show()
+
+# Plot of rate of ionization. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    # ax1.plot(cellGasData[job]['x'], cellGasData[job]['ProcRate_ex'], label = name_dict[job] + " excitation", linewidth=2)
+    ax1.plot(cellGasData[job]['x'], cellGasData[job]['ProcRate_iz'], label = name_dict[job], linewidth=2)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Volumetric rate of ionization (\# m$^{-3}$ s$^{-1}$)')
+ax1.set_ylim(bottom = 0)
+if PIC:
+    ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xlim(-.1e-3, 1.1e-3)
+if save:
+    if mode == "ion_power_dep":
+        fig.savefig(pic_path + "plasliq_volumetric_rates.eps", format = 'eps')
+plt.show()
+
+# Plot of rate of ionization. Whole gas domain
+fig = plt.figure()
+ax1 = plt.subplot(111)
+for job in job_names:
+    ax1.plot(cellGasData[job]['x'], cellGasData[job]['ProcRate_ex'], label = name_dict[job], linewidth=2)
+ax1.set_xticks(xtickers)
+ax1.set_xticklabels(xticker_labels)
+ax1.set_xlabel('Distance from cathode (microns)')
+ax1.set_ylabel('Volumetric rate of excitation (\# m$^{-3}$ s$^{-1}$)')
+ax1.set_ylim(bottom = 0)
+if PIC:
+    ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+ax1.legend(loc='best', fontsize = 16)
+ax1.set_xlim(-.1e-3, 1.1e-3)
+if save:
+    if mode == "ion_power_dep":
+        fig.savefig(pic_path + "plasliq_volumetric_excitation.eps", format = 'eps')
 plt.show()
 
 # # Plot of fluxes. Whole domain
@@ -454,57 +374,4 @@ plt.show()
 #     # fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
 # fig.savefig('/home/lindsayad/Pictures/fluxes_inset_grad_Te_zero.pdf', format='pdf')
 # fig.savefig('/home/lindsayad/Pictures/fluxes_inset_grad_Te_zero.eps', format='eps')
-# plt.show()
-
-# # Plot of electron temperature
-# fig = plt.figure()
-# ax1 = plt.subplot(111)
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['e_temp'], label = 'T_e gas', linewidth=2)
-#     ax1.set_ylim(0, 6.0)
-#     ax1.set_xlim(0, 0.001)
-#     ax1.legend(loc=0)
-#     ax1.set_xticks([0, .25e-3, .5e-3, .75e-3])
-#     ax1.set_xticklabels(['0','250', '500', '750'])
-#     ax1.set_xlabel('Distance from cathode (microns)')
-#     ax1.set_ylabel('T_e (eV)')
-# fig.savefig('/home/lindsayad/Pictures/e_temp_grad_Te_zero.pdf', format='pdf')
-# fig.savefig('/home/lindsayad/Pictures/e_temp_grad_Te_zero.eps', format='eps')
-# plt.show()
-
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# TotElemMax = np.amax(cellData[job]['GlobalElementId'])
-# for job in job_names:
-#     job_for_tex = job.replace("_"," ")
-#     ax.plot(cellData[job]['GlobalElementId'][0:GasElemMax], cellData[job]['tot_gas_current'][0:GasElemMax], label = 'tot_gas_current ' + name_dict[job], linewidth=2)
-#     ax.plot(cellData[job]['GlobalElementId'][GasElemMax:TotElemMax], cellData[job]['tot_liq_current'][GasElemMax:TotElemMax], label = 'tot_liq_current ' + name_dict[job], linewidth=2)
-#     ax.set_xlim(-0.1 * TotElemMax, 1.1 * TotElemMax)
-#     ax.legend(loc=(0.1,0.5))
-#     ax.set_xlabel('Global element ID')
-#     ax.set_ylabel('Current (Amps/m^2)')
-#     fig.tight_layout()
-#     fig.savefig('/home/lindsayad/Pictures/current_continuity.pdf', format='pdf')
-# plt.show()
-
-# liquid_plot_vars = ['em_lin']
-# for var in liquid_plot_vars:
-#     var_for_tex = var.replace("_"," ")
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-#     for job in job_names:
-#         job_for_tex = job.replace("_"," ")
-#         ax.plot(cellLiquidData[job]['x'],cellLiquidData[job][var],label=name_dict[job], linewidth=2)
-#     xmin = np.amin(cellLiquidData[job]['x'])
-#     xmax = np.amax(cellLiquidData[job]['x'])
-#     ax.set_xlabel('x')
-#     ax.set_ylabel(var_for_tex)
-#     ax.set_xlim(-0.1 * (xmax - xmin) + xmin, 0.1 * (xmax - xmin) + xmax)
-#     ax.set_yscale('log')
-#     # ax.legend(loc='upper center',bbox_to_anchor=(0.5,1.1),fancybox=True,shadow=True,fontsize=12,ncol=len(cellLiquidData.keys())/2)
-#     # fig.set_size_inches((10,9))
-#     ax.legend(loc=0)
-#     fig.tight_layout()
-#     fig.savefig('/home/lindsayad/Pictures/' + var + '_coupled_liq_only_dummy.pdf',format='pdf')
 # plt.show()
