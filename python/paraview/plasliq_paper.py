@@ -12,6 +12,10 @@ N_A = 6.02e23
 coulomb = 1.6e-19
 
 def load_data():
+    global job_names, name_dict, cellGasData, cellLiquidData, pointGasData, pointLiquidData
+    data = OrderedDict()
+    cellData = OrderedDict()
+
     if mode == "kinetic":
         # Files for kinetic plots
         file_root = "mean_en_kinetic_r_0"
@@ -37,6 +41,13 @@ def load_data():
         file_root = "mean_en_kinetic_r_0"
         job_names = ["_no_salt_or_H3Op_correct_mesh", "pt9999_corrected_mesh_has_power_dep_and_proc_rates"]
         short_names = ["$\gamma=1$", "$\gamma=10^{-4}$"]
+
+    elif mode == "condition_compare":
+        # Files for comparing all boundary condition permutations
+        file_root = ""
+        job_names = ["mean_en_kinetic_r_0_no_salt_or_H3Op", "mean_en_kinetic_r_0pt9999_no_salt_or_H3Op", "mean_en_thermo_no_salt_or_H3Op_H_1_Hagelaar_energy", "mean_en_thermo_no_salt_or_H3Op_H_1_zero_grad_mean_en", "mean_en_thermo_no_salt_or_H3Op_H_100000_zero_grad_mean_en", "dens_kinetic_en_zero_grad_gamma_1", "dens_kinetic_en_zero_grad_gamma_1e-4"]
+        short_names = ["$kk\;\gamma=1$", "$kk\;\gamma=10^{-4}$", "$tk\;H=1$", "$tz\;H=1$", "$tz\;H=1e5$", "$kz\;\gamma=1$", "$kz\;\gamma=10^{-4}$"]
+
     name_dict = {x:y for x,y in zip(job_names, short_names)}
 
     index = 0
@@ -164,7 +175,8 @@ def plot_ions(save, pmode):
     ax1.set_xlabel('Distance from cathode ($\mu m$)')
     ax1.set_ylabel('Gas Ion Density (m$^{-3}$)')
     ax1.set_yscale('log')
-    ax1.set_ylim(bottom=1e15)
+    ax1.set_xlim(-.1e-3, 1.1e-3)
+    ax1.set_ylim(bottom=1e16)
     if save:
         if pmode == "kinetic":
             fig.savefig('/home/lindsayad/Pictures/plasliq_ion_density_full_kinetic.eps', format='eps')
@@ -172,6 +184,29 @@ def plot_ions(save, pmode):
             fig.savefig('/home/lindsayad/Pictures/plasliq_ion_density_full_energy_bc.eps', format='eps')
         elif pmode == "thermo":
             fig.savefig(pic_path + "plasliq_ion_density_thermo.eps", format='eps')
+    plt.show()
+
+def plot_elec_gas(save, pmode):
+    # Plot of electron density. Whole gas domain
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xticks(xtickers)
+    ax1.set_xticklabels(xticker_labels)
+    ax1.set_xlabel('Distance from cathode ($\mu m$)')
+    ax1.set_ylabel('Gas Electron Density (m$^{-3}$)')
+    ax1.set_yscale('log')
+    ax1.set_ylim(bottom=1e16)
+    ax1.set_xlim(-.1e-3, 1.1e-3)
+    if save:
+        if pmode == "kinetic":
+            fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_gas_only_kinetic.eps', format='eps')
+        elif pmode == "energybc":
+            fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_gas_only_energy_bc.eps', format='eps')
+        elif pmode == "thermo":
+            fig.savefig(pic_path + "plasliq_electron_density_thermo.eps", format='eps')
     plt.show()
 
 def plot_potential(save, pmode):
@@ -302,6 +337,63 @@ def plot_ex_rate(save, pmode):
             fig.savefig(pic_path + "plasliq_volumetric_excitation.eps", format = 'eps')
     plt.show()
 
+def plot_el_rate(save, pmode):
+    # Plot of rate of elastic collisions. Whole gas domain
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        ax1.plot(cellGasData[job]['x'], cellGasData[job]['ProcRate_el'], label = name_dict[job], linewidth=2)
+    ax1.set_xticks(xtickers)
+    ax1.set_xticklabels(xticker_labels)
+    ax1.set_xlabel('Distance from cathode (microns)')
+    ax1.set_ylabel('Volumetric rate of elastic collisions (\# m$^{-3}$ s$^{-1}$)')
+    ax1.set_ylim(bottom = 0)
+    if PIC:
+        ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xlim(-.1e-3, 1.1e-3)
+    if save:
+        if pmode == "ion_power_dep":
+            fig.savefig(pic_path + "plasliq_volumetric_elastic.eps", format = 'eps')
+    plt.show()
+
+def plot_rho(save, pmode):
+    # Plot of charge density. Whole gas domain
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        ax1.plot(cellGasData[job]['x'], cellGasData[job]['rho'] * 1.6e-19, label = name_dict[job], linewidth=2)
+    ax1.set_xticks(xtickers)
+    ax1.set_xticklabels(xticker_labels)
+    ax1.set_xlabel('Distance from cathode (microns)')
+    ax1.set_ylabel('Charge Density (C m$^{-3}$)')
+    if PIC:
+        ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xlim(.25e-3, .75e-3)
+    ax1.set_ylim(-1, 1)
+    if save:
+        if pmode == "kinetic":
+            fig.savefig(pic_path + "plasliq_rho_kinetic.eps", format = 'eps')
+    plt.show()
+
+def plot_efield(save, pmode):
+    # Plot of charge density. Whole gas domain
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        ax1.plot(cellGasData[job]['x'], cellGasData[job]['Efield'] * 1000, label = name_dict[job], linewidth=2)
+    ax1.set_xticks(xtickers)
+    ax1.set_xticklabels(xticker_labels)
+    ax1.set_xlabel('Distance from cathode (microns)')
+    ax1.set_ylabel('Electric Field(V m$^{-1}$)')
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xlim(-.1e-3, 1.1e-3)
+    if save:
+        if pmode == "kinetic":
+            fig.savefig(pic_path + "plasliq_efield_kinetic.eps", format = 'eps')
+    plt.show()
+
 def plot_fluxes_full(save, pmode):
     # Plot of fluxes. Whole domain
     fig = plt.figure(figsize=(10., 5.), dpi = 80)
@@ -367,12 +459,8 @@ def plot_fluxes_last_bit(save, pmode):
 
 path = "/home/lindsayad/gdrive/MooseOutput/"
 pic_path = "/home/lindsayad/gdrive/Pictures/"
-file_root = ""
 job_names = []
-short_names = []
 name_dict = {}
-data = OrderedDict()
-cellData = OrderedDict()
 cellGasData = OrderedDict()
 cellLiquidData = OrderedDict()
 pointGasData = OrderedDict()
@@ -389,8 +477,15 @@ emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
 emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
 
 PIC = False
-mode = "kinetic"
+mode = "condition_compare"
 
+global_save = False
 load_data()
 # plot_elec_dens_full(False, mode)
-plot_ions(False, mode)
+plot_ions(global_save, mode)
+plot_potential(global_save, mode)
+# plot_rho(False, mode)
+# plot_efield(global_save, mode)
+# plot_el_rate(global_save, mode)
+plot_elec_gas(global_save, mode)
+plot_e_temp(global_save, mode)
