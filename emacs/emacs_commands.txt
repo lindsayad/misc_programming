@@ -1,0 +1,7 @@
+Some neat regular expressions:
+
+Replace-regexp:
+
+2 -> \,(+ 3 \#)
+
+What's going on: \, says we're going to do a Lisp expression. We're going to add 3 and \#. Note that this notation doesn't work!: (3 + \#). No good! \# stands for the number of replacements that have already occurred.

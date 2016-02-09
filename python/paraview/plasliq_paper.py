@@ -8,11 +8,11 @@ from matplotlib import rc
 rc('text', usetex=True)
 
 mpl.rcParams.update({'font.size': 20})
-N_A = 6.02e23
+nnN_A = 6.02e23
 coulomb = 1.6e-19
 
 def load_data():
-    global job_names, name_dict, cellGasData, cellLiquidData, pointGasData, pointLiquidData
+    global job_names, name_dict, cellGasData, cellLiquidData, pointGasData, pointLiquidData, label_dict, style_dict, mesh_dict
     data = OrderedDict()
     cellData = OrderedDict()
 
@@ -21,34 +21,83 @@ def load_data():
         file_root = "mean_en_kinetic_r_0"
         job_names = ["_no_salt_or_H3Op", "pt9_no_salt_or_H3Op", "pt99_no_salt_or_H3Op", "pt999_no_salt_or_H3Op", "pt9999_no_salt_or_H3Op"]
         short_names = ["$\gamma=1$", "$\gamma=10^{-1}$", "$\gamma=10^{-2}$", "$\gamma=10^{-3}$", "$\gamma=10^{-4}$"]
+        labels = ['blue', 'red', 'green', 'pink', 'orange']
+
+    elif mode == "kinetic_vary_gamma_dens_only":
+        # Files for kinetic plots
+        file_root = "mean_en_kinetic_r_dens_0"
+        job_names = ["pt9_r_en_0"]
+        short_names = ["$\gamma_{dens}=10^{-1}$"]
+        labels = ['blue']
+        mesh_struct = ["scaled"]
+        styles = ['solid']
+        # job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
+        # short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
+        # labels = ['blue', 'red', 'green', 'pink', 'orange']
+        # mesh_struct = ["scaled", "scaled", "scaled", "scaled", "scaled"]
+        # styles = ['solid', 'dashed', 'dashdot', 'dotted', 'solid']
 
     elif mode == "energybc":
         # Files for energy bc plot. Comparison of energy BCs for H = 1
         file_root = "mean_en_thermo_no_salt_or_H3Op_H_1"
         job_names = ["_Hagelaar_energy", "_zero_grad_mean_en"]
         short_names = ["vacuum", "zero grad"]
+        labels = ['blue', 'red']
 
     elif mode == "thermo":
         # Files for thermo plot. Comparison of different values of H
-        file_root = "mean_en_thermo_no_salt_or_H3Op_H_"
+        file_root = "mean_en_"
         suffix = "_zero_grad_mean_en"
-        job_names = ["1", "10", "100", "1000", "10000", "100000"]
-        short_names = ["H = 1", "H = 1e1", "H = 1e2", "H = 1e3", "H = 1e4", "H = 1e5"]
-        job_names = [job + suffix for job in job_names]
+        job_names = ["H_1e6_en_0", "H_1e4_en_0", "H_1e2_en_0", "H_1_en_0"]
+        short_names = ["$H=10^6$", "$H=10^4$", "$H=10^2$", "$H=1$"]
+        # job_names = ["H_1e7_en_0", "H_1e6_en_0", "thermo_H_1e5_en_0", "H_1e4_en_0", "H_1e3_en_0", "H_1e2_en_0", "H_1e1_en_0", "H_1_en_0"]
+        # short_names = ["$H=10^7$", "$H=10^6$", "$H=10^5$", "$H=10^4$", "$H=10^3$", "$H=10^2$", "$H=10^1$", "$H=1$"]
+        labels = ['blue', 'red', 'green', 'black']
+        styles = ['solid', 'dashed', 'dashdot', 'dotted']
+        mesh_struct = ["scaled", "scaled", "scaled", "scaled"]
+        # labels = ['blue', 'red', 'green', 'pink', 'purple', 'orange', 'black', 'brown']
+        # styles = ['solid', 'dashed', 'dashdot', 'dotted', 'solid', 'dashed', 'dashdot', 'dotted']
+        # mesh_struct = ["scaled", "scaled", "scaled", "scaled", "scaled", "scaled", "scaled", "scaled"]
 
     elif mode == "ion_power_dep":
         # Files for power deposition and process rates comparison
         file_root = "mean_en_kinetic_r_0"
         job_names = ["_no_salt_or_H3Op_correct_mesh", "pt9999_corrected_mesh_has_power_dep_and_proc_rates"]
         short_names = ["$\gamma=1$", "$\gamma=10^{-4}$"]
+        labels = ['blue', 'red']
 
     elif mode == "condition_compare":
         # Files for comparing all boundary condition permutations
         file_root = ""
-        job_names = ["mean_en_kinetic_r_0_no_salt_or_H3Op", "mean_en_kinetic_r_0pt9999_no_salt_or_H3Op", "mean_en_thermo_no_salt_or_H3Op_H_1_Hagelaar_energy", "mean_en_thermo_no_salt_or_H3Op_H_1_zero_grad_mean_en", "mean_en_thermo_no_salt_or_H3Op_H_100000_zero_grad_mean_en", "dens_kinetic_en_zero_grad_gamma_1", "dens_kinetic_en_zero_grad_gamma_1e-4"]
-        short_names = ["$kk\;\gamma=1$", "$kk\;\gamma=10^{-4}$", "$tk\;H=1$", "$tz\;H=1$", "$tz\;H=1e5$", "$kz\;\gamma=1$", "$kz\;\gamma=10^{-4}$"]
+        if files == "all consistent":
+            job_names = ["mean_en_kinetic_r_0_no_salt_or_H3Op", "mean_en_kinetic_r_0pt9999_no_salt_or_H3Op", "mean_en_thermo_no_salt_or_H3Op_H_1_zero_grad_mean_en", "mean_en_thermo_no_salt_or_H3Op_H_100000_zero_grad_mean_en", "dens_kinetic_en_zero_grad_gamma_1", "dens_kinetic_en_zero_grad_gamma_1e-4", "mean_en_thermo_H_1e5_en_kinetic_r_0", "mean_en_thermo_H_1_en_kinetic_r_0pt9999"]
+            short_names = ["$kk,\;\gamma=1$", "$kk,\;\gamma=10^{-4}$", "$tz,\;H=1$", "$tz,\;H=10^5$", "$kz,\;\gamma=1$", "$kz,\;\gamma=10^{-4}$", "$tk,\;H=10^5,\;\gamma=1$", "$tk,\;H=1,\;\gamma=10^{-4}$"]
+            labels = ['blue', 'red', 'green', 'pink', 'magenta', 'orange', 'brown', 'purple']
+
+        elif files == "thermo extremes":
+            job_names = ["mean_en_thermo_no_salt_or_H3Op_H_1_Hagelaar_energy", "mean_en_thermo_H_1e5_en_kinetic_r_0", "mean_en_thermo_H_1e5_en_kinetic_r_0pt9999", "mean_en_thermo_H_1_en_kinetic_r_0pt9999"]
+            short_names = ["$tk,\;H=1,\;\gamma=1$", "$tk,\;H=10^5,\;\gamma=1$", "$tk,\;H=10^5,\;\gamma=10^{-4}$", "$tk,\;H=1,\;\gamma=10^{-4}$"]
+            labels = ['blue', 'red', 'green', 'black']
+            styles = ['solid', 'dashed', 'dashdot', 'dotted']
+
+        elif files == "kinetic extremes":
+            job_names = ["mean_en_kinetic_r_0_no_salt_or_H3Op", "mean_en_kinetic_r_0pt9999_no_salt_or_H3Op", "mean_en_kinetic_r_dens_0_r_en_0pt9999", "mean_en_kinetic_r_dens_0pt9999_r_en_0"]
+            labels = ['blue', 'red', 'green', 'black']
+            styles = ['solid', 'dashed', 'dashdot', 'dotted']
+            short_names = ["$kk,\;\gamma_{den}=1,\;\gamma_{en}=1$", "$kk,\;\gamma_{den}=10^{-4},\;\gamma_{en}=10^{-4}$", "$kk,\;\gamma_{den}=1,\;\gamma_{en}=10^{-4}$", "$kk,\;\gamma_{den}=10^{-4},\;\gamma_{en}=1$"]
+            mesh_struct = ["phys", "phys", "scaled", "scaled"]
+
+        elif files == "all":
+            job_names = ["mean_en_kinetic_r_0_no_salt_or_H3Op", "mean_en_kinetic_r_0pt9999_no_salt_or_H3Op", "mean_en_thermo_no_salt_or_H3Op_H_1_Hagelaar_energy", "mean_en_thermo_no_salt_or_H3Op_H_1_zero_grad_mean_en", "mean_en_thermo_no_salt_or_H3Op_H_100000_zero_grad_mean_en", "dens_kinetic_en_zero_grad_gamma_1", "dens_kinetic_en_zero_grad_gamma_1e-4", "mean_en_thermo_H_1e5_en_kinetic_r_0", "mean_en_thermo_H_1e5_en_kinetic_r_0pt9999", "mean_en_thermo_H_1_en_kinetic_r_0pt9999"]
+            short_names = ["$kk,\;\gamma=1$", "$kk,\;\gamma=10^{-4}$", "$tk,\;H=1,\;\gamma=1$", "$tz,\;H=1$", "$tz,\;H=10^5$", "$kz,\;\gamma=1$", "$kz,\;\gamma=10^{-4}$", "$tk,\;H=10^5,\;\gamma=1$", "$tk,\;H=10^5,\;\gamma=10^{-4}$", "$tk,\;H=1,\;\gamma=10^{-4}$"]
+            labels = ['blue', 'red', 'green', 'pink', 'magenta', 'orange', 'brown', 'violet', 'turquoise', 'black']
+
+        # elif files == "kinetic extremes":
 
     name_dict = {x:y for x,y in zip(job_names, short_names)}
+    label_dict = {x:y for x,y in zip(job_names, labels)}
+    style_dict = {x:y for x,y in zip(job_names, styles)}
+    mesh_dict = {x:y for x,y in zip(job_names, mesh_struct)}
 
     index = 0
     GasElemMax = 0
@@ -105,24 +154,26 @@ def plot_elec_dens_full(save, pmode):
     plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
     ax1 = plt.subplot(121)
     for job in job_names:
-        ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
+        ax1.plot(cellGasData[job]['x'] * 1e-3, cellGasData[job]['em_lin'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
     ax1.set_yscale('log')
     ax1.legend(loc='upper left', fontsize = 16)
     ax1.set_xticks(xtickers)
-    ax1.set_xticklabels(xticker_labels)
-    ax1.set_xlabel('Distance from cathode ($\mu m$)')
+    ax1.set_xticklabels(['1000', '750', '500', '250', '0'])
+    ax1.set_xlabel('Distance from Interface ($\mu m$)')
     ax1.set_ylabel('Gas Electron Density (m$^{-3}$)')
+    ax1.set_xlim(-.1e-3,1.1e-3)
     ax2 = plt.subplot(122)
     for job in job_names:
-        ax2.plot(cellLiquidData[job]['x'], cellLiquidData[job]['emliq_lin'], label = name_dict[job], linewidth=2)
+        ax2.plot(1e-3 + (cellLiquidData[job]['x'] - 1.) * 1e-7, cellLiquidData[job]['emliq_lin'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
     ax2.legend(loc=0, fontsize = 16)
-    ax2.set_xticks([1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
-    ax2.set_xticklabels(['25', '50', '75', '100'])
+    ax2.set_xticks([1e-3, 1e-3 + 25e-9, 1e-3 + 50e-9, 1e-3 + 75e-9, 1e-3 + 100e-9])
+    ax2.set_xticklabels(['0', '25', '50', '75', '100'])
     ax2.set_xlabel('Distance from interface ($nm$)')
     ax2.yaxis.tick_right()
     ax2.yaxis.set_label_position("right")
     ax2.set_ylabel('Liquid Electron Density (m$^{-3}$)')
     ax2.set_yscale('log')
+    ax2.set_xlim(1e-3 - .1e-7, 1e-3 + 1.1e-7)
     if save:
         if pmode == "kinetic":
             fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_kinetic.eps', format='eps')
@@ -130,6 +181,9 @@ def plot_elec_dens_full(save, pmode):
             fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_energy_bc.eps', format='eps')
         elif pmode == "thermo":
             fig.savefig(pic_path + "plasliq_electron_density_full_thermo.eps", format='eps')
+
+        elif pmode == "kinetic_vary_gamma_dens_only":
+            fig.savefig(pic_path + "plasliq_edens_full_gammadens.eps", format='eps')
     plt.show()
 
 def currents_full(save, pmode):
@@ -168,11 +222,14 @@ def plot_ions(save, pmode):
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
-        ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], label = name_dict[job], linewidth=2)
+        if mesh_dict[job] == "phys":
+            ax1.plot(cellGasData[job]['x'], cellGasData[job]['Arp_lin'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        elif mesh_dict[job] == "scaled":
+            ax1.plot(cellGasData[job]['x'] * 1e-3, cellGasData[job]['Arp_lin'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
     ax1.legend(loc='best', fontsize = 16)
     ax1.set_xticks(xtickers)
     ax1.set_xticklabels(xticker_labels)
-    ax1.set_xlabel('Distance from cathode ($\mu m$)')
+    ax1.set_xlabel('Distance from interface ($\mu m$)')
     ax1.set_ylabel('Gas Ion Density (m$^{-3}$)')
     ax1.set_yscale('log')
     ax1.set_xlim(-.1e-3, 1.1e-3)
@@ -184,6 +241,19 @@ def plot_ions(save, pmode):
             fig.savefig('/home/lindsayad/Pictures/plasliq_ion_density_full_energy_bc.eps', format='eps')
         elif pmode == "thermo":
             fig.savefig(pic_path + "plasliq_ion_density_thermo.eps", format='eps')
+
+        elif pmode == "kinetic_vary_gamma_dens_only":
+            fig.savefig(pic_path + "plasliq_idens_gammadens.eps", format='eps')
+
+        elif pmode == "condition_compare":
+            if files == "all consistent":
+                fig.savefig(pic_path + "plasliq_ion_density_consist_compare.eps", format='eps')
+            elif files == "all":
+                fig.savefig(pic_path + "plasliq_ion_density_compare.eps", format='eps')
+            elif files == "thermo extremes":
+                fig.savefig(pic_path + "plasliq_ion_density_thermo_extremes.eps", format='eps')
+            elif files == "kinetic extremes":
+                fig.savefig(pic_path + "plasliq_ion_density_kinetic_extremes.eps", format='eps')
     plt.show()
 
 def plot_elec_gas(save, pmode):
@@ -191,7 +261,10 @@ def plot_elec_gas(save, pmode):
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
-        ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], label = name_dict[job], linewidth=2)
+        if mesh_dict[job] == "phys":
+            ax1.plot(cellGasData[job]['x'], cellGasData[job]['em_lin'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        elif mesh_dict[job] == "scaled":
+            ax1.plot(cellGasData[job]['x'] * 1e-3, cellGasData[job]['em_lin'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
     ax1.legend(loc='best', fontsize = 16)
     ax1.set_xticks(xtickers)
     ax1.set_xticklabels(xticker_labels)
@@ -207,6 +280,15 @@ def plot_elec_gas(save, pmode):
             fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_gas_only_energy_bc.eps', format='eps')
         elif pmode == "thermo":
             fig.savefig(pic_path + "plasliq_electron_density_thermo.eps", format='eps')
+        elif pmode == "condition_compare":
+            if files == "all consistent":
+                fig.savefig(pic_path + "plasliq_electron_density_consist_compare.eps", format='eps')
+            elif files == "all":
+                fig.savefig(pic_path + "plasliq_electron_density_compare.eps", format='eps')
+            elif files == "thermo extremes":
+                fig.savefig(pic_path + "plasliq_electron_density_thermo_extremes.eps", format='eps')
+            elif files == "kinetic extremes":
+                fig.savefig(pic_path + "plasliq_electron_density_kinetic_extremes.eps", format='eps')
     plt.show()
 
 def plot_potential(save, pmode):
@@ -214,10 +296,13 @@ def plot_potential(save, pmode):
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
-        ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], label = name_dict[job], linewidth=2)
+        if mesh_dict[job] == "phys":
+            ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['potential'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        elif mesh_dict[job] == "scaled":
+            ax1.plot(pointGasData[job]['Points0'] * 1e-3, pointGasData[job]['potential'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
     ax1.set_xticks(xtickers)
     ax1.set_xticklabels(xticker_labels)
-    ax1.set_xlabel('Distance from cathode (microns)')
+    ax1.set_xlabel('Distance from interface (microns)')
     ax1.set_ylabel('Potential (kV)')
     if PIC:
         ax1.plot(emi_x, emi_pot / 1000, label = "PIC pot", linewidth = 2)
@@ -230,6 +315,19 @@ def plot_potential(save, pmode):
             fig.savefig('/home/lindsayad/Pictures/plasliq_potential_thermo_energy_bc.eps', format='eps')
         elif pmode == "thermo":
             fig.savefig(pic_path + "plasliq_potential_thermo.eps", format='eps')
+
+        elif pmode == "kinetic_vary_gamma_dens_only":
+            fig.savefig(pic_path + "plasliq_potential_gammadens.eps", format='eps')
+
+        elif pmode == "condition_compare":
+            if files == "all consistent":
+                fig.savefig(pic_path + "plasliq_potential_consist_compare.eps", format='eps')
+            elif files == "all":
+                fig.savefig(pic_path + "plasliq_potential_compare.eps", format='eps')
+            elif files == "thermo extremes":
+                fig.savefig(pic_path + "plasliq_potential_thermo_extremes.eps", format='eps')
+            elif files == "kinetic extremes":
+                fig.savefig(pic_path + "plasliq_potential_kinetic_extremes.eps", format='eps')
     plt.show()
 
 def plot_e_temp(save, pmode):
@@ -237,16 +335,19 @@ def plot_e_temp(save, pmode):
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
-        ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['e_temp'], label = name_dict[job], linewidth=2)
+        if mesh_dict[job] == "phys":
+            ax1.plot(pointGasData[job]['Points0'], pointGasData[job]['e_temp'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        elif mesh_dict[job] == "scaled":
+            ax1.plot(pointGasData[job]['Points0'] * 1e-3, pointGasData[job]['e_temp'], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
     ax1.set_xticks(xtickers)
     ax1.set_xticklabels(xticker_labels)
-    ax1.set_xlabel('Distance from cathode (microns)')
+    ax1.set_xlabel('Distance from interface (microns)')
     ax1.set_ylabel('Electron temperature (V)')
     if PIC:
         ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
     ax1.legend(loc='best', fontsize = 16)
     ax1.set_xlim(-.1e-3, 1.1e-3)
-    ax1.set_ylim(bottom = 0)
+    # ax1.set_ylim(bottom = 0, top = 10)
     if save:
         if pmode == "kinetic":
             fig.savefig(pic_path + "plasliq_e_temp_kinetic.eps", format = 'eps')
@@ -254,6 +355,19 @@ def plot_e_temp(save, pmode):
             fig.savefig('/home/lindsayad/Pictures/plasliq_e_temp_thermo_energy_bc.eps', format='eps')
         elif pmode == "thermo":
             fig.savefig(pic_path + "plasliq_e_temp_thermo.eps", format='eps')
+
+        elif pmode == "kinetic_vary_gamma_dens_only":
+            fig.savefig(pic_path + "plasliq_etemp_gammadens.eps", format='eps')
+
+        elif pmode == "condition_compare":
+            if files == "all consistent":
+                fig.savefig(pic_path + "plasliq_e_temp_consist_compare.eps", format='eps')
+            elif files == "all":
+                fig.savefig(pic_path + "plasliq_e_temp_compare.eps", format='eps')
+            elif files == "thermo extremes":
+                fig.savefig(pic_path + "plasliq_e_temp_thermo_extremes.eps", format='eps')
+            elif files == "kinetic extremes":
+                fig.savefig(pic_path + "plasliq_e_temp_kinetic_extremes.eps", format='eps')
     plt.show()
 
 def plot_power_dep_elec(save, pmode):
@@ -459,15 +573,13 @@ def plot_fluxes_last_bit(save, pmode):
 
 path = "/home/lindsayad/gdrive/MooseOutput/"
 pic_path = "/home/lindsayad/gdrive/Pictures/"
-job_names = []
-name_dict = {}
 cellGasData = OrderedDict()
 cellLiquidData = OrderedDict()
 pointGasData = OrderedDict()
 pointLiquidData = OrderedDict()
 xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
-xticker_labels = ['0','250', '500', '750', '1000']
-
+# xticker_labels = ['0','250', '500', '750', '1000']
+xticker_labels = ['1000', '750', '500', '250', '0']
 # Emi data
 emi_path = "/home/lindsayad/gdrive/TabularData/emi_data/gas_only/"
 emi_x, emi_n_e = np.loadtxt(emi_path + "ne_vs_x.txt", unpack = True)
@@ -477,15 +589,17 @@ emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
 emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
 
 PIC = False
-mode = "condition_compare"
+# mode = "thermo"
+mode = "kinetic_vary_gamma_dens_only"
+# files = "kinetic extremes"
 
 global_save = False
 load_data()
-# plot_elec_dens_full(False, mode)
+plot_elec_dens_full(global_save, mode)
 plot_ions(global_save, mode)
 plot_potential(global_save, mode)
 # plot_rho(False, mode)
 # plot_efield(global_save, mode)
 # plot_el_rate(global_save, mode)
-plot_elec_gas(global_save, mode)
+# plot_elec_gas(global_save, mode)
 plot_e_temp(global_save, mode)
