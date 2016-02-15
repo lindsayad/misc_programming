@@ -1,0 +1,46 @@
+Scientific computing models:
+Ondrej Certik (founder of sympy)
+Aaron Meurer (co-lead developer of sympy. Also has hand in conda)
+Travis Oliphant  (founder of Continuum Analytics. Served as president of Enthought. Founder of numpy and scipy)
+Katy Huff (nuclear engineer. Founder of Hacker Within at Berkeley. Contributor to scientific python packages)
+Moose Team
+William Stein (founder of Sage)
+Jannis Teunissen (good friend; user and contributor to open source)
+
+import random
+for x in range(20):
+  print random.randint(0,9)
+
+This is now going to be my python notebook.
+
+What classes does Mul inherit from? It inherits from Expr and AssocOp
+
+The class Expr inherits from Basic. The class Basic has the member function func. I accessed this by using winpdb.
+
+    def func(self):
+        """
+        The top-level function in an expression.
+
+        The following should hold for all objects::
+
+            >> x == x.func(*x.args)
+
+Ok my test expression is this:
+
+x + y * (n*z + p*z)
+
+summa is a list of terms formed by using Add.make_args(expr), so in this case the list formed is:
+
+[x, y * (n*z + p*z)]
+
+Then we iterate over the summa list, referring to each element in the list as "product".
+
+We take "product" and we split that into terms using Mul.make_args(product). terms then is also a list (although it's a list of tuples, slightly different than the summa list)
+
+So for product = x:
+   terms = [x]
+
+for product = y * (n*z + p*z):
+    terms = [y, n*z + p*z]
+
+Then the question becomes, how do we split the elements of terms into smaller pieces? In this case we shouldn't need to: n*z + p*z is exactly the type of expression that we want to run collect on. Question to be answered tomorrow

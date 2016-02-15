@@ -4,7 +4,6 @@ visit/copiedScripts/
 *.pdf
 visit/visitInterface.py
 *~
-*.txt
 CellDerivatives.xml
 CopiedReloadPlugin.xml
 *.pyc
