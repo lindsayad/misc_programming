@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from collections import OrderedDict
 from matplotlib import rc
+from matplotlib.ticker import ScalarFormatter
 rc('text', usetex=True)
 
 mpl.rcParams.update({'font.size': 20})
@@ -26,16 +27,16 @@ def load_data():
     elif mode == "kinetic_vary_gamma_dens_only":
         # Files for kinetic plots
         file_root = "mean_en_kinetic_r_dens_0"
-        job_names = ["pt9_r_en_0"]
-        short_names = ["$\gamma_{dens}=10^{-1}$"]
-        labels = ['blue']
-        mesh_struct = ["scaled"]
-        styles = ['solid']
-        # job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
-        # short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
-        # labels = ['blue', 'red', 'green', 'pink', 'orange']
-        # mesh_struct = ["scaled", "scaled", "scaled", "scaled", "scaled"]
-        # styles = ['solid', 'dashed', 'dashdot', 'dotted', 'solid']
+        # job_names = ["pt9_r_en_0"]
+        # short_names = ["$\gamma_{dens}=10^{-1}$"]
+        # labels = ['blue']
+        # mesh_struct = ["scaled"]
+        # styles = ['solid']
+        job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
+        short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
+        labels = ['blue', 'red', 'green', 'pink', 'orange']
+        mesh_struct = ["scaled", "scaled", "scaled", "scaled", "scaled"]
+        styles = ['solid', 'dashed', 'dashdot', 'dashed', 'solid']
 
     elif mode == "energybc":
         # Files for energy bc plot. Comparison of energy BCs for H = 1
@@ -150,7 +151,7 @@ def load_data():
 
 def plot_elec_dens_full(save, pmode):
     # Plot of electron densities. Whole gas-liquid domain
-    fig = plt.figure(figsize=(10., 5.), dpi = 80)
+    fig = plt.figure(figsize=(10., 7.), dpi = 80)
     plt.subplots_adjust(wspace=0.00001, hspace = 0.00001)
     ax1 = plt.subplot(121)
     for job in job_names:
@@ -176,14 +177,14 @@ def plot_elec_dens_full(save, pmode):
     ax2.set_xlim(1e-3 - .1e-7, 1e-3 + 1.1e-7)
     if save:
         if pmode == "kinetic":
-            fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_kinetic.eps', format='eps')
+            fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_kinetic_wide.eps', format='eps')
         elif pmode == "energybc":
-            fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_energy_bc.eps', format='eps')
+            fig.savefig('/home/lindsayad/Pictures/plasliq_electron_density_full_energy_bc_wide.eps', format='eps')
         elif pmode == "thermo":
-            fig.savefig(pic_path + "plasliq_electron_density_full_thermo.eps", format='eps')
+            fig.savefig(pic_path + "plasliq_electron_density_full_thermo_wide.eps", format='eps')
 
         elif pmode == "kinetic_vary_gamma_dens_only":
-            fig.savefig(pic_path + "plasliq_edens_full_gammadens.eps", format='eps')
+            fig.savefig(pic_path + "plasliq_edens_full_gammadens_wide.eps", format='eps')
     plt.show()
 
 def currents_full(save, pmode):
@@ -291,6 +292,64 @@ def plot_elec_gas(save, pmode):
                 fig.savefig(pic_path + "plasliq_electron_density_kinetic_extremes.eps", format='eps')
     plt.show()
 
+def cell_gas_generic(save, pmode, variable, pos_scaling, ylabel, tight_plot, xticks, xticklabels, xlabel, xmin=None, xmax=None, ymin=None, ymax=None, yscale=None):
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        if mesh_dict[job] == "phys":
+            ax1.plot(cellGasData[job]['x'], cellGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        elif mesh_dict[job] == "scaled":
+            ax1.plot(cellGasData[job]['x'] / pos_scaling, cellGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(xticklabels)
+    ax1.set_xlabel(xlabel)
+    ax1.set_ylabel(ylabel)
+    if xmin is not None:
+        ax1.set_xlim(left=xmin)
+    if xmax is not None:
+        ax1.set_xlim(right=xmax)
+    if ymin is not None:
+        ax1.set_ylim(bottom=ymin)
+    if ymax is not None:
+        ax1.set_ylim(top=ymax)
+    if yscale is not None:
+        ax1.set_yscale(yscale)
+    if tight_plot:
+        fig.tight_layout()
+    if save:
+        fig.savefig('/home/lindsayad/Pictures/' + pmode + '_' + variable + '.eps', format='eps')
+    plt.show()
+
+def point_gas_generic(save, pmode, variable, pos_scaling, ylabel, tight_plot, xticks, xticklabels, xlabel, xmin=None, xmax=None, ymin=None, ymax=None, yscale=None):
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        if mesh_dict[job] == "phys":
+            ax1.plot(pointGasData[job]['Points0'], pointGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        elif mesh_dict[job] == "scaled":
+            ax1.plot(pointGasData[job]['Points0'] / pos_scaling, pointGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xticks(xticks)
+    ax1.set_xticklabels(xticklabels)
+    ax1.set_xlabel(xlabel)
+    ax1.set_ylabel(ylabel)
+    if xmin is not None:
+        ax1.set_xlim(left=xmin)
+    if xmax is not None:
+        ax1.set_xlim(right=xmax)
+    if ymin is not None:
+        ax1.set_ylim(bottom=ymin)
+    if ymax is not None:
+        ax1.set_ylim(top=ymax)
+    if yscale is not None:
+        ax1.set_yscale(yscale)
+    if tight_plot:
+        fig.tight_layout()
+    if save:
+        fig.savefig('/home/lindsayad/Pictures/' + pmode + '_' + variable + '.eps', format='eps')
+    plt.show()
+
 def plot_potential(save, pmode):
     # Plot of potential. Whole gas domain
     fig = plt.figure()
@@ -347,6 +406,7 @@ def plot_e_temp(save, pmode):
         ax1.plot(emi_x, emi_etemp, label = "PIC em temp", linewidth = 2)
     ax1.legend(loc='best', fontsize = 16)
     ax1.set_xlim(-.1e-3, 1.1e-3)
+    fig.tight_layout()
     # ax1.set_ylim(bottom = 0, top = 10)
     if save:
         if pmode == "kinetic":
@@ -357,7 +417,7 @@ def plot_e_temp(save, pmode):
             fig.savefig(pic_path + "plasliq_e_temp_thermo.eps", format='eps')
 
         elif pmode == "kinetic_vary_gamma_dens_only":
-            fig.savefig(pic_path + "plasliq_etemp_gammadens.eps", format='eps')
+            fig.savefig(pic_path + "plasliq_etemp_gammadens_wide.eps", format='eps')
 
         elif pmode == "condition_compare":
             if files == "all consistent":
@@ -491,12 +551,12 @@ def plot_rho(save, pmode):
             fig.savefig(pic_path + "plasliq_rho_kinetic.eps", format = 'eps')
     plt.show()
 
-def plot_efield(save, pmode):
-    # Plot of charge density. Whole gas domain
+def plot_efield(save, pmode, pos_scaling):
+    # Plot of electric field. Whole gas domain
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
-        ax1.plot(cellGasData[job]['x'], cellGasData[job]['Efield'] * 1000, label = name_dict[job], linewidth=2)
+        ax1.plot(cellGasData[job]['x'] / pos_scaling, cellGasData[job]['Efield'] * 1000 * pos_scaling, label = name_dict[job], linewidth=2)
     ax1.set_xticks(xtickers)
     ax1.set_xticklabels(xticker_labels)
     ax1.set_xlabel('Distance from cathode (microns)')
@@ -506,6 +566,31 @@ def plot_efield(save, pmode):
     if save:
         if pmode == "kinetic":
             fig.savefig(pic_path + "plasliq_efield_kinetic.eps", format = 'eps')
+    plt.show()
+
+def plot_efield_interface(save, pmode, pos_scaling):
+    # Plot of electric field. Whole gas domain
+    fig = plt.figure()
+    ax1 = plt.subplot(111)
+    for job in job_names:
+        ax1.plot(cellGasData[job]['x'] / pos_scaling, cellGasData[job]['Efield'] * 1000 * pos_scaling, label = name_dict[job], linewidth=2)
+    ax1.set_xticks([.996e-3, .998e-3, 1e-3])
+    ax1.set_xticklabels(['4', '2', '0'])
+    ax1.set_xlabel('Distance from interface (microns)')
+    ax1.set_ylabel('Electric Field(V m$^{-1}$)')
+    ax1.legend(loc='best', fontsize = 16)
+    ax1.set_xlim(0.995e-3, 1e-3)
+    ax1.set_ylim(-4e6, 0)
+    sf = ScalarFormatter()
+    sf.set_scientific(True)
+    sf.set_powerlimits((-3,4))
+    ax1.yaxis.set_major_formatter(sf)
+    fig.tight_layout()
+    if save:
+        if pmode == "kinetic":
+            fig.savefig(pic_path + "plasliq_efield_kinetic_int.eps", format = 'eps')
+        if pmode == "kinetic_vary_gamma_dens_only":
+            fig.savefig(pic_path + "plasliq_efield_kdens_int.eps", format = 'eps')
     plt.show()
 
 def plot_fluxes_full(save, pmode):
@@ -593,13 +678,26 @@ PIC = False
 mode = "kinetic_vary_gamma_dens_only"
 # files = "kinetic extremes"
 
-global_save = False
+global_save = True
+pos_scaling = 1e3
+microns = 4
+mic_step = 1
+ticks = [1e-3 - 1e-6 * (microns - i) for i in range(0, microns + mic_step, mic_step)]
+ticklabels = [str(i) for i in range(microns, -mic_step, -mic_step)]
+
 load_data()
-plot_elec_dens_full(global_save, mode)
-plot_ions(global_save, mode)
-plot_potential(global_save, mode)
+# plot_elec_dens_full(global_save, mode)
+# plot_ions(global_save, mode)
+# plot_potential(global_save, mode)
 # plot_rho(False, mode)
 # plot_efield(global_save, mode)
 # plot_el_rate(global_save, mode)
 # plot_elec_gas(global_save, mode)
-plot_e_temp(global_save, mode)
+# plot_e_temp(global_save, mode)
+# plot_efield_interface(global_save, mode, pos_scaling)
+
+cell_gas_generic(global_save, mode, 'rho', pos_scaling, 'Charge Density (C m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
+
+# cell_gas_generic(global_save, mode, 'em_lin', pos_scaling, 'Gas Electron Density (m$^{-3}$)', 'log', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin=.98e-3, xmax=1e-3)
+
+# point_gas_generic(global_save, mode, 'potential', pos_scaling, 'Potential (kV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, ymin=-.01)
