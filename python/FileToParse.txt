@@ -1,0 +1,16 @@
+_sem[_qp]     = -rxn1[_qp]-rxn2[_qp]-2*rxn3[_qp]-rxn4[_qp]-rxn5[_qp]-rxn6[_qp]-rxn7[_qp]-rxn8[_qp]-rxn9[_qp]-rxn10[_qp]-rxn11[_qp]+rxn15[_qp];
+_sH[_qp]      = rxn1[_qp]+rxn2[_qp]-rxn4[_qp]+rxn7[_qp]-rxn12[_qp]-2*rxn13[_qp]-rxn14[_qp]-rxn15[_qp]-rxn16[_qp]+rxn17[_qp]-rxn18[_qp]-rxn19[_qp]+rxn24[_qp]+rxn29[_qp]+rxn37[_qp];
+_sOHm[_qp]    = rxn1[_qp]+2*rxn3[_qp]+rxn4[_qp]+rxn5[_qp]+2*rxn6[_qp]+rxn8[_qp]+2*rxn9[_qp]-rxn15[_qp]-rxn25[_qp]+rxn27[_qp]+rxn28[_qp]+rxn29[_qp]+rxn31[_qp]+2*rxn33[_qp]+rxn35[_qp]-rxn37[_qp];
+_sH2Op[_qp]   = -rxn2[_qp]-rxn36[_qp];
+_sOH[_qp]     = rxn2[_qp]-rxn5[_qp]+rxn8[_qp]+rxn9[_qp]+rxn12[_qp]-rxn14[_qp]+rxn16[_qp]+rxn17[_qp]+2*rxn20[_qp]-2*rxn22[_qp]-rxn23[_qp]-rxn24[_qp]-rxn25[_qp]-rxn26[_qp]-rxn27[_qp]+rxn28[_qp]-rxn34[_qp]-rxn35[_qp]+rxn36[_qp]+rxn37[_qp];
+_sH2[_qp]     = rxn3[_qp]+rxn4[_qp]+rxn12[_qp]+2*rxn13[_qp]-rxn17[_qp]-rxn24[_qp]-rxn29[_qp];
+_sOm[_qp]     = -rxn6[_qp]+rxn11[_qp]-rxn23[_qp]+rxn25[_qp]-rxn28[_qp]-rxn29[_qp]-rxn30[_qp]-rxn31[_qp]-rxn32[_qp]-rxn33[_qp];
+_sH3Op[_qp]   = -rxn8[_qp]+rxn36[_qp]-rxn37[_qp]+rxn38[_qp]-rxn39[_qp];
+_sH2O2[_qp]   = -rxn8[_qp]-rxn16[_qp]-rxn17[_qp]+rxn19[_qp]+rxn22[_qp]-rxn30[_qp]-rxn34[_qp];
+_sHO2m[_qp]   = -rxn9[_qp]+rxn23[_qp]-rxn31[_qp]-rxn35[_qp];
+_sO2[_qp]     = -rxn10[_qp]-rxn18[_qp]-rxn21[_qp]+rxn26[_qp]+rxn27[_qp];
+_sO2m[_qp]    = rxn10[_qp]-rxn27[_qp]+rxn30[_qp]+rxn31[_qp]-rxn32[_qp]-rxn33[_qp]+rxn38[_qp]-rxn39[_qp];
+_sO[_qp]      = -rxn11[_qp]-rxn20[_qp]-rxn21[_qp];
+_sHO2[_qp]    = rxn18[_qp]-rxn19[_qp]-rxn26[_qp]+rxn34[_qp]+rxn35[_qp]-rxn38[_qp]+rxn39[_qp];
+_sO3[_qp]     = rxn21[_qp];
+_sO3m[_qp]    = rxn32[_qp];

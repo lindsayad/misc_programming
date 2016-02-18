@@ -1,0 +1,19 @@
+Retrieving python module path:
+
+import a_module
+print a_module.__file__
+
+get path of python binary that's executing the script:
+
+from os import sys
+sys.executable
+
+How do I check what version of Python is running my script?
+
+from os import sys
+sys.version
+
+How to check which version of Numpy I'm using?
+
+import numpy
+numpy.version.version

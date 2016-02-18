@@ -1,0 +1,27 @@
+In Galerkin finite elements, the mass matrix is not diagonal. Mass lumping is a procedure in which all
+the elements in a mass matrix row are summed, and then that sum is put on the diagonal. All off-diagonal
+elements are then set to zero. 
+
+The explicit Forward Euler method for finite element is not stable unless I use mass lumping. This is mysterious to me. 
+Obtained good result for Forward Euler with Mass Lumping with dt = h**2/2 (Both with old code and with new code that combines Forward Euler to Backward Euler much more neatly)
+Obtained good result for Backward Euler with Mass Lumping with dt = h
+Obtained undamped oscillatons for Forward Euler with Mass Lumping with dt = h (Here we see the explicit time stepping limitation)
+Obtained damped oscillations for Crank with Mass Lumping with dt = h
+Obtained good result for Crank with Mass Lumping with dt = h**2/2
+Obtained good result for Backward Euler without Mass Lumping with dt = h**2/2
+Obtained good result for Backward Euler without Mass Lumping with dt = h
+Obtained damped oscillations for Crank without Mass Lumping with dt = h
+Obtained good result for Crank without Mass Lumping with dt = h**2/2
+Obtained good result for Forward Euler without Mass Lumping with dt = h**3/2 (This eliminates the idea that Forward Euler simply won't work without mass lumping. It's just that the stability criterion for dt is very strict for this numerical scheme. Good.) 
+
+Conclusions:
+Forward Euler only good with Mass Lumping and Small Time Steps (mass lumping essential)
+Backward Euler good regardless of time stepping or mass lumping (mass lumping appeared to have no effect)
+Crank good for small time steps, damped oscillatory for large time steps (mass lumping appeared to have no effect)
+Good behavior seems to be independent of mesh size
+
+Simpson's rule is exact for estimating the integral of second order polynomials. The trapezoidal rule would be exact for estimating the integral of first order polynomials.
+
+My brief experiments wuld lead me to conclude that Gaussian quadrature can exactly approximate integrals of polynomials as long as the number of points >= the polynomial order. This kind of seems like it would make intuitive sense.
+
+With 0.7 for the cfl_factor, sim fails at 1.61 ns. With 0.1 for CFL factor, sim fails at 2.34 ns. This was actually a quicker fail than when I didn't have downwinding for the electron_energy.

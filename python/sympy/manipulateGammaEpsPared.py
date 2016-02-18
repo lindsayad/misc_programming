@@ -1,5 +1,7 @@
-from sympy import *
-import pdb
+# import sympy
+# from sympy import *
+# from print_example import print_it
+# import pdb
 
 r_e, a, mu_el, E, n, epsilon, n_gamma, epsilon_gamma, v_th, Gamma_p, mu_e, gamma_p, n_alpha, epsilon_alpha, Gamma_e, mu_i, b, n_i, v_ith, bob, e, A, R, V_bat, u = symbols('r_e a mu_el E n epsilon n_gamma epsilon_gamma v_th Gamma_p mu_e gamma_p n_alpha epsilon_alpha Gamma_e mu_i b n_i v_ith bob e A R V_bat u')
 
@@ -11,7 +13,9 @@ J_tot = simplify(e * Gamma_p - e * Gamma_e)
 soln = solve(V_bat + u - J_tot * A * R, E, dict=True)
 Gamma_eps = simplify(soln[0][E])
 factored = Gamma_eps.factor()
+# pdb.set_trace()
 collect1 = collect(factored, A)
-pdb.set_trace()
 collect2 = collect(collect1, gamma_p)
 collect3 = collect(collect2, R)
+
+# print_it()

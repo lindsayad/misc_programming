@@ -1,0 +1,23 @@
+Save input to file (ipython):
+
+%save <file> <lines>
+Example:
+%save input 36-38 40
+
+Save output to file (ipython) if output is not a string or macro:
+Example:
+%save output str(_38)
+or
+%save output str(Out[38])
+
+autoreload in python. Makes it so that whenever imported function source code is changed, ipython loads those changes.
+
+run in ipython:
+%load_ext autoreload
+%autoreload 2
+
+Remove installed python files installed with setup.py install:
+
+run in bash:
+python setup.py install --record files.txt
+cat files.txt | xargs rm -rf

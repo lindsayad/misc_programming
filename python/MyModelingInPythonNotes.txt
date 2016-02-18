@@ -1,0 +1,5 @@
+In my situation of building lookup tables, the example coordinates and xyz are analagous to my electric field. In OpenFoam, regional (geographical, geomtrical) coupling is accomplished through coupledFvScalarMatrix (see Open_Foam_for_multiphysics_simulations). To couple different fields on the same mesh in an implicit, fully coupled way, have to use block matrices, e.g. BlockLduMatrix. This is different from OpenFoam's default behavior in which solvers for each field are segregated and couplings are handled in an explicit way. This is different from the default behavior in MOOSE or Comsol, in which variables are fully coupled in a fully implicit fashion. No segregated solves: solved all at once. 
+
+To toggle off c-synctactic-indentation, do:
+
+M-x c-toggle-syntactic-indentation RET

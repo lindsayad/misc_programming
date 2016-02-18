@@ -1,0 +1,16 @@
+_Jac_em[_qp]     = -_k1[_qp]*_cw[_qp]-_k2[_qp]*_H2Op[_qp]-2*_k3[_qp]*2.0*_em[_qp]*_cw[_qp]*_cw[_qp]-_k4[_qp]*_H[_qp]*_cw[_qp]-_k5[_qp]*_OH[_qp]-_k6[_qp]*_Om[_qp]*_cw[_qp]-_k7[_qp]*_H3Op[_qp]-_k8[_qp]*_H2O2[_qp]-_k9[_qp]*_HO2m[_qp]*_cw[_qp]-_k10[_qp]*_O2[_qp]-_k11[_qp]*_O[_qp];
+_Jac_H[_qp]      = -_k4[_qp]*_em[_qp]*_cw[_qp]-_k12[_qp]*_cw[_qp]-2*_k13[_qp]*2.0*_H[_qp]-_k14[_qp]*_OH[_qp]-_k15[_qp]*_OHm[_qp]-_k16[_qp]*_H2O2[_qp]-_k18[_qp]*_O2[_qp]-_k19[_qp]*_HO2[_qp];
+_Jac_OHm[_qp]    = -_k15[_qp]*_H[_qp]-_k25[_qp]*_OH[_qp]-_k37[_qp]*_H3Op[_qp];
+_Jac_H2Op[_qp]   = -_k2[_qp]*_em[_qp]-_k36[_qp]*_cw[_qp];
+_Jac_OH[_qp]     = -_k5[_qp]*_em[_qp]-_k14[_qp]*_H[_qp]-2*_k22[_qp]*2.0*_OH[_qp]-_k23[_qp]*_Om[_qp]-_k24[_qp]*_H2[_qp]-_k25[_qp]*_OHm[_qp]-_k26[_qp]*_HO2[_qp]-_k27[_qp]*_O2m[_qp]-_k34[_qp]*_H2O2[_qp]-_k35[_qp]*_HO2m[_qp];
+_Jac_H2[_qp]     = 0.0;
+_Jac_Om[_qp]     = -_k6[_qp]*_em[_qp]*_cw[_qp];
+_Jac_H3Op[_qp]   = -_k8[_qp]*_em[_qp]*_H2O2[_qp];
+_Jac_H2O2[_qp]   = -_k8[_qp]*_em[_qp]-_k16[_qp]*_H[_qp]-_k17[_qp]*_H2[_qp];
+_Jac_HO2m[_qp]   = -_k9[_qp]*_em[_qp]*_cw[_qp];
+_Jac_O2[_qp]     = -_k10[_qp]*_em[_qp]-_k18[_qp]*_H[_qp]-_k21[_qp]*_O[_qp];
+_Jac_O2m[_qp]    = 0.0;
+_Jac_O[_qp]      = -_k11[_qp]*_em[_qp]-_k20[_qp]*_cw[_qp]-_k21[_qp]*_O2[_qp];
+_Jac_HO2[_qp]    = 0.0;
+_Jac_O3[_qp]     = 0.0;
+_Jac_O3m[_qp]    = 0.0;
