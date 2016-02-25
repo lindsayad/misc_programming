@@ -215,19 +215,25 @@ def plot_elec_gas(save, pmode):
                 fig.savefig(pic_path + "plasliq_electron_density_kinetic_extremes.eps", format='eps')
     plt.show()
 
-def cell_gas_generic(save, variable, pos_scaling, ylabel, tight_plot, xticks, xticklabels, xlabel, xmin=None, xmax=None, ymin=None, ymax=None, yscale=None, save_string="dummy"):
+def cell_gas_generic(save, variables, pos_scaling, ylabel, tight_plot, xticks, xticklabels, xlabel, xmin=None, xmax=None, ymin=None, ymax=None, yscale=None, save_string="dummy", var_labels = ''):
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
-        if mesh_dict[job] == "phys":
-            ax1.plot(cellGasData[job]['x'], cellGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
-        elif mesh_dict[job] == "scaled":
-            ax1.plot(cellGasData[job]['x'] / pos_scaling, cellGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
+        plot_label = name_dict[job]
+        for variable in variables:
+            if len(variables) > 1:
+                plot_label = plot_label + var_labels[variable]
+            ax1.plot(cellGasData[job]['x'] / pos_scaling, cellGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = plot_label, linewidth=2)
+
     ax1.legend(loc='best', fontsize = 16)
     ax1.set_xticks(xticks)
     ax1.set_xticklabels(xticklabels)
     ax1.set_xlabel(xlabel)
     ax1.set_ylabel(ylabel)
+    sf = ScalarFormatter()
+    sf.set_scientific(True)
+    sf.set_powerlimits((-3,4))
+    ax1.yaxis.set_major_formatter(sf)
     if xmin is not None:
         ax1.set_xlim(left=xmin)
     if xmax is not None:
@@ -595,21 +601,19 @@ emi_x, emi_n_i = np.loadtxt(emi_path + "ni_vs_x.txt", unpack = True)
 emi_x, emi_pot = np.loadtxt(emi_path + "Potential_vs_x.txt", unpack = True)
 emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
 emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
-
 PIC = False
-# mode = "kinetic_vary_gamma_dens_only"
-
 global_save = True
-pos_scaling = 1e3
-microns = 1000
-mic_step = 200
+pos_scaling = 1
+microns = 100
+mic_step = 20
 ticks = [1e-3 - 1e-6 * (microns - i) for i in range(0, microns + mic_step, mic_step)]
 ticklabels = [str(i) for i in range(microns, -mic_step, -mic_step)]
-num_jobs = 2
-job_names = ["mean_en_gden_0_gen_0_ballast_50e3", "mean_en_gden_0_gen_0_ballast_1e6"]
-short_names = ["high current", "low current"]
-# job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
-# short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
+num_jobs = 5
+# job_names = ["mean_en_gden_0_gen_0_ballast_50e3", "mean_en_gden_0_gen_0_ballast_1e6"]
+# short_names = ["high current", "low current"]
+job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
+job_names = ["mean_en_r_dens_0" + i for i in job_names]
+short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
 labels_list = ['blue', 'red', 'green', 'pink', 'orange']
 styles_list = ['solid', 'dashed', 'dashdot']
 labels = [labels_list[i] for i in range(num_jobs)]
@@ -626,15 +630,13 @@ load_data(short_names, labels, mesh_struct, styles)
 # plot_elec_gas(global_save, mode)
 # plot_e_temp(global_save, mode)
 # plot_efield_interface(global_save, mode, pos_scaling)
-
 # cell_gas_generic(global_save, 'rho', pos_scaling, 'Charge Density (C m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
-
-cell_gas_generic(global_save, 'em_lin', pos_scaling, 'Gas Electron Density (m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, yscale='log', ymin=1e17)
-
-cell_gas_generic(global_save, 'Arp_lin', pos_scaling, 'Gas Ion Density (m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, yscale='log', ymin=1e17)
-
-cell_gas_generic(global_save, 'tot_gas_current', pos_scaling, 'Gas Current (A m$^{-2}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
-
-point_gas_generic(global_save, 'potential', pos_scaling, 'Potential (kV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
-
-point_gas_generic(global_save, 'e_temp', pos_scaling, 'Electron Temperature (eV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, ymin=0)
+# cell_gas_generic(global_save, 'em_lin', pos_scaling, 'Gas Electron Density (m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, yscale='log', ymin=1e17)
+# cell_gas_generic(global_save, 'Arp_lin', pos_scaling, 'Gas Ion Density (m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, yscale='log', ymin=1e17)
+# cell_gas_generic(global_save, 'PowerDep_em', pos_scaling, 'Power deposited in electrons (W m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6)
+cell_gas_generic(global_save, ['PowerDep_em', 'PowerDep_Arp'], pos_scaling, 'Power deposition (W m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6, var_labels = [' e$^-$', ' Ar$^+$'])
+# cell_gas_generic(global_save, 'Efield', pos_scaling, 'Electric Field (V m$^{-1}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6, ymin = -4e6)
+# cell_gas_generic(global_save, 'Current_em', pos_scaling, 'Electron Current (A m$^{-2}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6, ymin = -1600, ymax = -1200)
+# cell_gas_generic(global_save, 'tot_gas_current', pos_scaling, 'Gas Current (A m$^{-2}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
+# point_gas_generic(global_save, 'potential', pos_scaling, 'Potential (kV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
+# point_gas_generic(global_save, 'e_temp', pos_scaling, 'Electron Temperature (eV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, ymin=0)
