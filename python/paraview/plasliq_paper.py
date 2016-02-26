@@ -1,4 +1,5 @@
-from paraview.simple import *
+from load_data import load_data
+from plot_data import *
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,71 +7,12 @@ import matplotlib as mpl
 from collections import OrderedDict
 from matplotlib import rc
 from matplotlib.ticker import ScalarFormatter
+from test_module import hello_world
 rc('text', usetex=True)
 
 mpl.rcParams.update({'font.size': 20})
 nnN_A = 6.02e23
 coulomb = 1.6e-19
-
-def load_data(short_names, labels, mesh_struct, styles):
-    global job_names, name_dict, cellGasData, cellLiquidData, pointGasData, pointLiquidData, label_dict, style_dict, mesh_dict
-    data = OrderedDict()
-    cellData = OrderedDict()
-
-    name_dict = {x:y for x,y in zip(job_names, short_names)}
-    label_dict = {x:y for x,y in zip(job_names, labels)}
-    style_dict = {x:y for x,y in zip(job_names, styles)}
-    mesh_dict = {x:y for x,y in zip(job_names, mesh_struct)}
-
-    index = 0
-    GasElemMax = 0
-    path = "/home/lindsayad/gdrive/MooseOutput/"
-    for job in job_names:
-        file_sans_ext = path + job + "_gold_out"
-        inp = file_sans_ext + ".e"
-        out = file_sans_ext + ".csv"
-
-        reader = ExodusIIReader(FileName=inp)
-        tsteps = reader.TimestepValues
-        writer = CreateWriter(out, reader)
-        writer.Precision = 16
-        writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
-        del writer
-
-        for i in range(2,6):
-            os.remove(file_sans_ext + str(i) + ".csv")
-
-        new_inp0 = file_sans_ext + "0.csv"
-        data[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
-        pointGasData[job] = data[job]
-
-        # Use for coupled gas-liquid simulations
-        new_inp1 = file_sans_ext + "1.csv"
-        data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-        pointLiquidData[job] = data1
-        data[job] = np.concatenate((data[job],data1), axis=0)
-
-        writer = CreateWriter(out, reader)
-        writer.FieldAssociation = "Cells"
-        writer.Precision = 16
-        writer.UpdatePipeline(time=tsteps[len(tsteps)-1])
-        del writer
-
-        for i in range(2,6):
-            os.remove(file_sans_ext + str(i) + ".csv")
-
-        new_inp0 = file_sans_ext + "0.csv"
-        cellData[job] = np.genfromtxt(new_inp0,delimiter=',', names=True)
-        cellGasData[job] = cellData[job]
-        if index == 0:
-            GasElemMax = np.amax(cellData[job]['GlobalElementId'])
-
-        # Use for coupled gas-liquid simulations
-        new_inp1 = file_sans_ext + "1.csv"
-        data1 = np.genfromtxt(new_inp1, delimiter=',', names=True)
-        cellData[job] = np.concatenate((cellData[job],data1), axis=0)
-        cellLiquidData[job] = data1
-
 
 def plot_elec_dens_full(save, pmode):
     # Plot of electron densities. Whole gas-liquid domain
@@ -213,70 +155,6 @@ def plot_elec_gas(save, pmode):
                 fig.savefig(pic_path + "plasliq_electron_density_thermo_extremes.eps", format='eps')
             elif files == "kinetic extremes":
                 fig.savefig(pic_path + "plasliq_electron_density_kinetic_extremes.eps", format='eps')
-    plt.show()
-
-def cell_gas_generic(save, variables, pos_scaling, ylabel, tight_plot, xticks, xticklabels, xlabel, xmin=None, xmax=None, ymin=None, ymax=None, yscale=None, save_string="dummy", var_labels = ''):
-    fig = plt.figure()
-    ax1 = plt.subplot(111)
-    for job in job_names:
-        plot_label = name_dict[job]
-        for variable in variables:
-            if len(variables) > 1:
-                plot_label = plot_label + var_labels[variable]
-            ax1.plot(cellGasData[job]['x'] / pos_scaling, cellGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = plot_label, linewidth=2)
-
-    ax1.legend(loc='best', fontsize = 16)
-    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(xticklabels)
-    ax1.set_xlabel(xlabel)
-    ax1.set_ylabel(ylabel)
-    sf = ScalarFormatter()
-    sf.set_scientific(True)
-    sf.set_powerlimits((-3,4))
-    ax1.yaxis.set_major_formatter(sf)
-    if xmin is not None:
-        ax1.set_xlim(left=xmin)
-    if xmax is not None:
-        ax1.set_xlim(right=xmax)
-    if ymin is not None:
-        ax1.set_ylim(bottom=ymin)
-    if ymax is not None:
-        ax1.set_ylim(top=ymax)
-    if yscale is not None:
-        ax1.set_yscale(yscale)
-    if tight_plot:
-        fig.tight_layout()
-    if save:
-        fig.savefig('/home/lindsayad/Pictures/' + save_string + '_' + variable + '.eps', format='eps')
-    plt.show()
-
-def point_gas_generic(save, variable, pos_scaling, ylabel, tight_plot, xticks, xticklabels, xlabel, xmin=None, xmax=None, ymin=None, ymax=None, yscale=None, save_string="dummy"):
-    fig = plt.figure()
-    ax1 = plt.subplot(111)
-    for job in job_names:
-        if mesh_dict[job] == "phys":
-            ax1.plot(pointGasData[job]['Points0'], pointGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
-        elif mesh_dict[job] == "scaled":
-            ax1.plot(pointGasData[job]['Points0'] / pos_scaling, pointGasData[job][variable], color = label_dict[job], linestyle = style_dict[job], label = name_dict[job], linewidth=2)
-    ax1.legend(loc='best', fontsize = 16)
-    ax1.set_xticks(xticks)
-    ax1.set_xticklabels(xticklabels)
-    ax1.set_xlabel(xlabel)
-    ax1.set_ylabel(ylabel)
-    if xmin is not None:
-        ax1.set_xlim(left=xmin)
-    if xmax is not None:
-        ax1.set_xlim(right=xmax)
-    if ymin is not None:
-        ax1.set_ylim(bottom=ymin)
-    if ymax is not None:
-        ax1.set_ylim(top=ymax)
-    if yscale is not None:
-        ax1.set_yscale(yscale)
-    if tight_plot:
-        fig.tight_layout()
-    if save:
-        fig.savefig('/home/lindsayad/Pictures/' + save_string + '_' + variable + '.eps', format='eps')
     plt.show()
 
 def plot_potential(save, pmode):
@@ -591,9 +469,7 @@ cellGasData = OrderedDict()
 cellLiquidData = OrderedDict()
 pointGasData = OrderedDict()
 pointLiquidData = OrderedDict()
-xtickers = [0, .25e-3, .5e-3, .75e-3, 1e-3]
-# xticker_labels = ['0','250', '500', '750', '1000']
-xticker_labels = ['1000', '750', '500', '250', '0']
+
 # Emi data
 emi_path = "/home/lindsayad/gdrive/TabularData/emi_data/gas_only/"
 emi_x, emi_n_e = np.loadtxt(emi_path + "ne_vs_x.txt", unpack = True)
@@ -601,42 +477,56 @@ emi_x, emi_n_i = np.loadtxt(emi_path + "ni_vs_x.txt", unpack = True)
 emi_x, emi_pot = np.loadtxt(emi_path + "Potential_vs_x.txt", unpack = True)
 emi_x, emi_efield = np.loadtxt(emi_path + "Efield_vs_x.txt", unpack = True)
 emi_x, emi_etemp = np.loadtxt(emi_path + "Te_vs_x.txt", unpack = True)
+
 PIC = False
 global_save = True
 pos_scaling = 1
-microns = 100
-mic_step = 20
-ticks = [1e-3 - 1e-6 * (microns - i) for i in range(0, microns + mic_step, mic_step)]
-ticklabels = [str(i) for i in range(microns, -mic_step, -mic_step)]
-num_jobs = 5
-# job_names = ["mean_en_gden_0_gen_0_ballast_50e3", "mean_en_gden_0_gen_0_ballast_1e6"]
-# short_names = ["high current", "low current"]
-job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
-job_names = ["mean_en_r_dens_0" + i for i in job_names]
-short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
-labels_list = ['blue', 'red', 'green', 'pink', 'orange']
+microns = 1000
+mic_step = 500
+ticks = [1e-6 * i for i in range(0, microns + mic_step, mic_step)]
+ticklabels = ['{:.2e}'.format(tick) for tick in ticks]
+xmin = 1e-3 - 1.1 * microns * 1e-6
+xmax = 1e-3 + .1 * microns * 1e-6
+ymin = -.2e22
+ymax = 1.1e22
+
+# job_names = ["_r_en_0", "pt9_r_en_0", "pt99_r_en_0", "pt999_r_en_0", "pt9999_r_en_0"]
+# job_names = ["_r_en_0", "pt9999_r_en_0"]
+# job_names = ['', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7']
+job_names = ['', 'e2', 'e4', 'e6']
+job_names = ['mean_en_H_1' + i + '_r_en_0' for i in job_names]
+
+# short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-1}$", "$\gamma_{dens}=10^{-2}$", "$\gamma_{dens}=10^{-3}$", "$\gamma_{dens}=10^{-4}$"]
+# short_names = ["$\gamma_{dens}=1$", "$\gamma_{dens}=10^{-4}$"]
+short_names = ["$H=1$", "$H=10^2$", "$H=10^4$", "$H=10^6$"]
+
+num_jobs = len(job_names)
+
+labels_list = ['blue', 'red', 'green', 'orange']
 styles_list = ['solid', 'dashed', 'dashdot']
 labels = [labels_list[i] for i in range(num_jobs)]
 mesh_struct = ["scaled" for i in range(num_jobs)]
 styles = [styles_list[i % 3] for i in range(num_jobs)]
+job_colors = labels
+job_color_dict = {x:y for x,y in zip(job_names, job_colors)}
+name_dict = {x:y for x,y in zip(job_names, short_names)}
 
-load_data(short_names, labels, mesh_struct, styles)
-# plot_elec_dens_full(global_save, mode)
-# plot_ions(global_save, mode)
-# plot_potential(global_save, mode)
-# plot_rho(False, mode)
-# plot_efield(global_save, mode)
-# plot_el_rate(global_save, mode)
-# plot_elec_gas(global_save, mode)
-# plot_e_temp(global_save, mode)
-# plot_efield_interface(global_save, mode, pos_scaling)
-# cell_gas_generic(global_save, 'rho', pos_scaling, 'Charge Density (C m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
-# cell_gas_generic(global_save, 'em_lin', pos_scaling, 'Gas Electron Density (m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, yscale='log', ymin=1e17)
-# cell_gas_generic(global_save, 'Arp_lin', pos_scaling, 'Gas Ion Density (m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, yscale='log', ymin=1e17)
-# cell_gas_generic(global_save, 'PowerDep_em', pos_scaling, 'Power deposited in electrons (W m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6)
-cell_gas_generic(global_save, ['PowerDep_em', 'PowerDep_Arp'], pos_scaling, 'Power deposition (W m$^{-3}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6, var_labels = [' e$^-$', ' Ar$^+$'])
-# cell_gas_generic(global_save, 'Efield', pos_scaling, 'Electric Field (V m$^{-1}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6, ymin = -4e6)
-# cell_gas_generic(global_save, 'Current_em', pos_scaling, 'Electron Current (A m$^{-2}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - 1.1 * microns * 1e-6, xmax=1e-3 + .1 * microns * 1e-6, ymin = -1600, ymax = -1200)
-# cell_gas_generic(global_save, 'tot_gas_current', pos_scaling, 'Gas Current (A m$^{-2}$)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
-# point_gas_generic(global_save, 'potential', pos_scaling, 'Potential (kV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3)
-# point_gas_generic(global_save, 'e_temp', pos_scaling, 'Electron Temperature (eV)', True, ticks, ticklabels, 'Distance from interface ($\mu m$)', xmin= 1e-3 - microns * 1e-6, xmax=1e-3, ymin=0)
+gas_variables = ['em_lin']
+gas_var_labels = ['; e$^-$', '; Ar$^+$']
+num_gas_vars = len(gas_variables)
+gas_var_styles = [styles_list[i % 3] for i in range(num_gas_vars)]
+gas_var_label_dict = {x:y for x,y in zip(gas_variables, gas_var_labels)}
+gas_var_style_dict = {x:y for x,y in zip(gas_variables, gas_var_styles)}
+liquid_variables = ['emliq_lin']
+liq_var_labels = ['; e$^-$', '; OH$^-$']
+num_liq_vars = len(liquid_variables)
+liq_var_styles = [styles_list[i % 3] for i in range(num_liq_vars)]
+liq_var_label_dict = {x:y for x,y in zip(liquid_variables, liq_var_labels)}
+liq_var_style_dict = {x:y for x,y in zip(liquid_variables, liq_var_styles)}
+
+# hello_world(short_names, labels, mesh_struct, styles)
+
+cellGasData, cellLiquidData, pointGasData, pointLiquidData = load_data(job_names, short_names, labels, mesh_struct, styles)
+
+# cell_gas_generic(True, variables, 'Reaction Rate (\# m$^{-3}$)', True, 'Distance from interface ($\mu m$)', var_labels = var_label_dict, job_colors = job_color_dict, var_styles = var_style_dict, save_string = 'RateProcesses', yscale = 'log', ymin = 2e21, xmin = xmin, xmax = xmax, xticks = ticks, xticklabels = ticklabels, fontsize = 16, show_plot = False)
+cell_coupled_generic(cellGasData, cellLiquidData, job_names, name_dict, gas_variables, liquid_variables, 'Gas coordinate (m)', 'Liquid coordinate (m)', 'Electron Gas Density (\# m$^{-3}$)', 'Liquid Electron Density (\# m$^{-3}$)', save = True, tight_plot = False, show_plot = False, job_colors = job_color_dict, var_styles = gas_var_style_dict, var_labels = gas_var_label_dict, liq_var_styles = liq_var_style_dict, liq_var_labels = liq_var_label_dict, save_string = 'Dummy', yscale = 'log', y1min = 1e17, y2min = 1e21, y1max = 1e19, y2max = 1e23, x1min = -.05e-3, x1max = 1.05e-3, x2min = 0.9e-7, x2max = 2.1e-7)#, x1ticks = ticks, x1ticklabels = ticklabels)
