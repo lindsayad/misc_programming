@@ -6,31 +6,38 @@ rc('text', usetex=True)
 
 mpl.rcParams.update({'font.size': 20})
 
-def cell_gas_generic(gas_variables, xlabel, ylabel, save, tight_plot, xticks = [], xticklabels = [], xmin=None, xmax=None, ymin=None, ymax=None, yscale=None, save_string="dummy", var_labels = None, job_colors = None, var_styles = None, indep_var = 'x', fontsize = 16, show_plot = True):
+def cell_gas_generic(cellGasData, job_names, name_dict, gas_variables, x1label, y1label, save = False, tight_plot = True, x1ticks = [], x1ticklabels = [], x1min=None, x1max=None, y1min=None, y1max=None, yscale=None, save_string="dummy", job_colors = None, var_labels = None, var_styles = None, indep_var = 'x', fontsize = 16, show_plot = True):
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
         plot_label = name_dict[job]
-        for variable in variables:
-            if len(variables) > 1:
+        for variable in gas_variables:
+            if len(gas_variables) > 1:
                 plot_label = name_dict[job] + var_labels[variable]
-            ax1.plot(cellGasData[job][indep_var], cellGasData[job][variable], color = job_color_dict[job], linestyle = var_style_dict[variable], label = plot_label, linewidth=2)
+            ax1.plot(cellGasData[job][indep_var], cellGasData[job][variable], color = job_colors[job], linestyle = var_styles[variable], label = plot_label, linewidth=2)
 
-    ax1.set_xlabel(xlabel)
-    ax1.set_ylabel(ylabel)
+    ax1.set_xlabel(x1label)
+    ax1.set_ylabel(y1label)
     sf = ScalarFormatter()
     sf.set_scientific(True)
     sf.set_powerlimits((-3,4))
+    sf.useOffset = False
     ax1.yaxis.set_major_formatter(sf)
-    if len(xticks) > 0:
-        ax1.set_xticks(xticks)
-    if len(xticklabels) > 0:
-        ax1.set_xticklabels(xticklabels)
-    ax1.set_xlim(left=xmin)
-    ax1.set_xlim(right=xmax)
-    ax1.set_ylim(bottom=ymin)
-    ax1.set_ylim(top=ymax)
-    ax1.set_yscale(yscale)
+    ax1.xaxis.set_major_formatter(sf)
+    if len(x1ticks) > 0:
+        ax1.set_xticks(x1ticks)
+    if len(x1ticklabels) > 0:
+        ax1.set_xticklabels(x1ticklabels)
+    if x1min is not None:
+        ax1.set_xlim(left=x1min)
+    if x1max is not None:
+        ax1.set_xlim(right=x1max)
+    if y1min is not None:
+        ax1.set_ylim(bottom=y1min)
+    if y1max is not None:
+        ax1.set_ylim(top=y1max)
+    if yscale is not None:
+        ax1.set_yscale(yscale)
     ax1.legend(loc='best', fontsize = fontsize)
     if tight_plot:
         fig.tight_layout()
