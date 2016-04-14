@@ -10,11 +10,14 @@ def cell_gas_generic(cellGasData, job_names, name_dict, gas_variables, x1label, 
     fig = plt.figure()
     ax1 = plt.subplot(111)
     for job in job_names:
+        x = cellGasData[job][indep_var]
         plot_label = name_dict[job]
         for variable in gas_variables:
             if len(gas_variables) > 1:
                 plot_label = name_dict[job] + var_labels[variable]
-            ax1.plot(cellGasData[job][indep_var], cellGasData[job][variable], color = job_colors[job], linestyle = var_styles[variable], label = plot_label, linewidth=2)
+            y = cellGasData[job][variable]
+            x2,y2 = zip(*sorted(zip(x,y),key=lambda x: x[0]))
+            ax1.plot(x2, y2, color = job_colors[job], linestyle = var_styles[variable], label = plot_label, linewidth=2)
 
     ax1.set_xlabel(x1label)
     ax1.set_ylabel(y1label)
@@ -45,6 +48,7 @@ def cell_gas_generic(cellGasData, job_names, name_dict, gas_variables, x1label, 
         fig.savefig('/home/lindsayad/Pictures/' + save_string + '.eps', format='eps')
     if show_plot:
         plt.show()
+    plt.close()
 
 def cell_coupled_generic(cellGasData, cellLiquidData, job_names, name_dict, gas_variables, liquid_variables, x1label, x2label, y1label, y2label, save = False, tight_plot = True, x1ticks = [], x1ticklabels = [], x1min=None, x1max=None, y1min=None, y1max=None, x2ticks = [], x2ticklabels = [], x2min=None, x2max=None, y2min=None, y2max=None, yscale=None, save_string="dummy", job_colors = None, var_labels = None, var_styles = None, liq_var_labels = None, liq_var_styles = None, indep_var = 'x', fontsize = 16, show_plot = True):
     fig = plt.figure(figsize = (12., 7.), dpi = 80)

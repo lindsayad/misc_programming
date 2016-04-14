@@ -1,14 +1,14 @@
 #!/bin/bash
 
 ZAPPROBDIR="/home/lindsayad/projects/zapdos/problems/"
-INSTRING="mean_en"
+INSTRING="2d"
 ROOTSTRING=$INSTRING
-OUTSTRING=$ROOTSTRING"_r_dens_0_r_en_0pt_low_resist"
+OUTSTRING=$ROOTSTRING"_no_abs_tol_over_10_ns_completed"
 
 cp $ZAPPROBDIR"log.txt" $ZAPPROBDIR"MooseLogs/log_"$OUTSTRING"_gold.txt"
 cp $ZAPPROBDIR$INSTRING".i" $ZAPPROBDIR"MooseInput/"$OUTSTRING"_gold.i"
 cp $ZAPPROBDIR$INSTRING"_out.e" $ZAPPROBDIR"MooseOutput/"$OUTSTRING"_gold_out.e"
-cp $ZAPPROBDIR"liquidNew.geo" $ZAPPROBDIR"MooseMeshes/"$OUTSTRING"_gold.geo"
+cp $ZAPPROBDIR"2d.geo" $ZAPPROBDIR"MooseMeshes/"$OUTSTRING"_gold.geo"
 
 # cp $ZAPPROBDIR"log.txt" $ZAPPROBDIR"MooseLogs/log_"$OUTSTRING".txt"
 # cp $ZAPPROBDIR$INSTRING".i" $ZAPPROBDIR$OUTSTRING".i"
