@@ -5,13 +5,17 @@ from sympy import sqrt, re, im, I
 from constants import constants as c
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
+import matplotlib as mpl
+rc('text', usetex=True)
+mpl.rcParams.update({'font.size': 18})
 
 d = .05 * u.m
 A = 9.6 * (u.cm)**2
 mu = 1e-2 * (u.m)**2 / (u.V * u.s)
 # n_0 = 1e17 / (u.m)**3
 m = 9.11e-31 * u.kg
-T_g = 3000 * u.K
+T_g = 300 * u.K
 
 n_g = 1.01e5 * u.Pa / (c.kB * T_g)
 alpha = 2.1e-29 * (u.m)**3
@@ -25,28 +29,28 @@ def indep_array(start, finish, num_steps):
     return x
 
 def impedance_arrays(dens_points, freq_points):
+    Rp, Xp = np.zeros((len(dens_points), len(freq_points))), np.zeros((len(dens_points), len(freq_points)))
     for i in range(0, len(dens_points)):
         for j in range(0, len(freq_points)):
-            eps, Yp, Zp = imp.impedance(freq_points[j] / u.s, m, dens_points[i], A, d, eps_r, nu_m = nu_em)
+            eps, Yp, Zp = imp.impedance(freq_points[j] / u.s, m, dens_points[i] / (u.m)**3, A, d, eps_r, nu_m = nu_em)
             Rp[i][j] = re(Zp) / u.ohm
             Xp[i][j] = im(Zp) / u.ohm
     return Rp, Xp
 
-dens_start, dens_end, dens_steps = 1e15, 1e21, 50
-dens_points = indep_array(dens_start, dens_end, dens_steps)
-freq_points = np.array([.1e6, 2e6, 13e6, 60e6, 162e6])
-Rp_gas, Xp_gas = impedance_arrays(dens_points, freq_points)
+# dens_start, dens_end, dens_steps = 1e15, 1e21, 50
+# dens_points = indep_array(dens_start, dens_end, dens_steps)
+# freq_points = np.array([.1e6, 2e6, 13e6, 60e6, 162e6])
+# Rp_gas, Xp_gas = impedance_arrays(dens_points, freq_points)
 
-# for i in range(0, nf):
-#     eps, Yp, Zp = imp.impedance(f[i] / u.s, m, n_0, A, d, eps_r, nu_m = nu_em)
-#     Rp_gas[i] = re(Zp) / u.ohm
-#     Xp_gas[i] = im(Zp) / u.ohm
-
-# plt.plot(f, Rp_gas)
-# plt.yscale('log')
-# plt.xscale('log')
-# plt.savefig('Rp_vs_f.eps', format = 'eps')
-# plt.show()
+for j in range(0, len(freq_points)):
+    plt.plot(dens_points, Rp_gas[:,j], label = str(freq_points[j] / 1e6) + " MHz")
+plt.yscale('log')
+plt.xscale('log')
+plt.ylabel('Plasma resistance ($\Omega$)')
+plt.xlabel('Electron density (m$^{-3}$)')
+plt.legend(loc='best')
+plt.savefig('Rp_vs_dens.eps', format = 'eps')
+plt.show()
 # plt.plot(f, Xp_gas)
 
 # print "Plasma resistance in Ohms is " + str(Rp)
