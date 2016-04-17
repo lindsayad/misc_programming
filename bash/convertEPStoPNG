@@ -1,5 +1,0 @@
-#!/bin/bash
-
-for f in *.eps; do
-  convert $f ${f/%.eps/.png};
-done
