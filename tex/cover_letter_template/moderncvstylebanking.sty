@@ -92,14 +92,14 @@
     \ifthenelse{\isundefined{\@email}}{}{\addtomaketitle{\emailsymbol\emaillink{\@email}}}%
     \ifthenelse{\isundefined{\@homepage}}{}{\addtomaketitle{\homepagesymbol\httplink{\@homepage}}}%
     \ifthenelse{\isundefined{\@extrainfo}}{}{\addtomaketitle{\@extrainfo}}%
-    \flushmaketitle}\\[2.5em]}% need to force a \par after this to avoid weird spacing bug at the first section if no blank line is left after \maketitle
+    \flushmaketitle}\\[1em]}% need to force a \par after this to avoid weird spacing bug at the first section if no blank line is left after \maketitle
 
 
 %-------------------------------------------------------------------------------
 %                resume style definition
 %-------------------------------------------------------------------------------
 % fonts
-\renewcommand*{\namefont}{\Huge\bfseries\upshape}
+\renewcommand*{\namefont}{\Large\bfseries\upshape}
 \renewcommand*{\titlefont}{\Huge\mdseries\upshape}
 \renewcommand*{\addressfont}{\normalsize\mdseries\upshape}
 \renewcommand*{\quotefont}{\large\slshape}
@@ -253,7 +253,7 @@
   \recomputeletterlengths%
   % sender block
   \maketitle%
-  \par%
+  %% \par%
    % recipient block
 %%   \begin{minipage}[t]{.5\textwidth}
 %%     \raggedright%
@@ -267,15 +267,15 @@
 %%   \@date\\[2em]% US informal style: "April 6, 2006"; UK formal style: "05/04/2006"
 %%   % opening
 %%   \raggedright%
-  \@opening\\[1.5em]%
+  \@opening\\[0.5em]%
   % ensure no extra spacing after \makelettertitle due to a possible blank line
 %  \ignorespacesafterend% not working
   \hspace{0pt}\par\vspace{-\baselineskip}\vspace{-\parskip}
 }
 
 \renewcommand*{\makeletterclosing}{
-  \vspace{2em}
-  \@closing\\[3em]%
+  \vspace{0.5em}
+  \@closing\\[1em]%
   {\@firstname~\@lastname}%
   %% \ifthenelse{\isundefined{\@enclosure}}{}{%
   %%   \\%
