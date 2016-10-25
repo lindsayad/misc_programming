@@ -6,3 +6,5 @@
 *.out
 *.csv
 *.eps
+*.out
+*.dbg
