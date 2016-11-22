@@ -84,9 +84,6 @@ protected:
 
   void solve();
 
-  void findInterval(Real x, unsigned int & klo, unsigned int & khi) const;
-  void computeCoeffs(unsigned int klo, unsigned int khi, Real x, Real & h, Real & a, Real & b) const;
-
   static int _file_number;
 };
 

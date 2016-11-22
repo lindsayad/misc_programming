@@ -9,7 +9,7 @@
 typedef std::vector<std::vector<Real> > matrix;
 
 /**
- * This class interpolates tabulated functions with a bi-cubic
+ * This class interpolates tabulated functions with a bi-cubic spline
  *
  * Adopted from Numerical Recipes in C (section 3.6).
  */
@@ -25,15 +25,13 @@ public:
   virtual ~BicubicSplineInterpolation() = default;
 
   /**
-   * Set the x-, y- values and first derivatives
+   * Set the x1-, x2, y- values and first derivatives
    */
   void setData(const std::vector<Real> & x1, const std::vector<Real> & x2, const std::vector<std::vector<Real> > & y, Real yp1 = 1e30, Real ypn = 1e30);
 
   void errorCheck();
 
-  void calcCoeffs(std::vector<Real> & y, std::vector<Real> & y1, std::vector<Real> & y2, std::vector<Real> & y12, Real & d1, Real & d2, std::vector<std::vector<Real> > & coeffs);
-
-  void interpolate(std::vector<Real> & y, std::vector<Real> & y1, std::vector<Real> & y2, std::vector<Real> & y12, Real & x1l, Real & x1u, Real & x2l, Real & x2u, Real & x1, Real & x2, Real & ansy, Real & ansy1, Real & ansy2);
+  Real sample(Real x1, Real x2);
 
 protected:
   std::vector<Real> _x1;

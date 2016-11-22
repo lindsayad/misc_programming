@@ -18,7 +18,11 @@ public:
 
 protected:
 
+  /**
+   * This function calculates the second derivatives based on supplied x and y-vectors
+   */
   void spline(const std::vector<Real> & x, const std::vector<Real> & y, std::vector<Real> & y2, Real yp1 = 1e30, Real ypn = 1e30);
+
   void findInterval(const std::vector<Real> & x, Real x_int, unsigned int & klo, unsigned int & khi) const;
   void computeCoeffs(const std::vector<Real> & x, unsigned int klo, unsigned int khi, Real x_int, Real & h, Real & a, Real & b) const;
 
