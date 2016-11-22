@@ -1,4 +1,5 @@
 #include "BicubicSplineInterpolation.h"
+#include "SplineInterpolation.h"
 
 int main()
 {
