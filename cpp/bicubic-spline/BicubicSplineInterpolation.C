@@ -48,7 +48,7 @@ BicubicSplineInterpolation::precomputeAuxSecondDerivativeTable()
   int m = _x1.size();
   _y2.resize(m);
 
-  for (int j = 1; j <= m; ++j)
+  for (int j = 0; j < m; ++j)
     spline(_x2, _y[j], _y2[j]);
 }
 
@@ -66,7 +66,7 @@ BicubicSplineInterpolation::sample(Real x1, Real x2)
   std::vector<Real> column_spline_second_derivs(m), row_spline_eval(m);
 
   // Evaluate m row-splines to get y-values for column spline construction
-  for (int j = 1; j <= m; ++j)
+  for (int j = 0; j < m; ++j)
     row_spline_eval[j] = SplineInterpolationBase::sample(_x2, _y[j], _y2[j], x2);
 
   // Construct single column spline; get back the second derivatives
