@@ -1,0 +1,30 @@
+{
+   <load_source_module>
+   Memcheck:Addr4
+   ...
+   fun:load_source_module
+}
+{
+   <py>
+   Memcheck:Addr4
+   ...
+   fun:*Py*
+}
+{
+   <py_cond>
+   Memcheck:Cond
+   ...
+   fun:*Py*
+}
+{
+   <py_jump>
+   Memcheck:Jump
+   ...
+   fun:*Py*
+}
+{
+   <py_val8>
+   Memcheck:Value8
+   ...
+   fun:*Py*
+}
