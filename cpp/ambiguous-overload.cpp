@@ -27,9 +27,12 @@ int main() {
   operator*<double>(x *x, vec);
   operator*<double>(vec, x);
 
-  VectorDN<Real> vector_dual_number;
+  VectorValueDN<Real> vector_dual_number;
   VectorValue<Real> vector_value;
   auto intermed = x * vector_value;
 
-  // operator*<Real>(x *vector_value, vector_dual_number);
+  operator*<VectorValue, Real>(intermed, vector_dual_number);
+  operator*<VectorValue>(intermed, vector_dual_number);
+  operator*<>(intermed, vector_dual_number);
+  auto final = intermed * vector_dual_number;
 }
