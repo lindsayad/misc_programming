@@ -4,6 +4,7 @@
 #include <vector>
 
 template <typename T> using vec = std::vector<T>;
+typedef VectorValue<Real> RealVectorValue;
 
 template <typename T> vec<T> operator*(const T &scalar, const vec<T> &vector) {
   std::cout << "called overload 1\n";
@@ -35,4 +36,33 @@ int main() {
   operator*<VectorValue>(intermed, vector_dual_number);
   operator*<>(intermed, vector_dual_number);
   auto final = intermed * vector_dual_number;
+
+  ScalarDN<Real> scalar_ad_prop;
+  VectorValueDN<Real> vector_ad_prop;
+  TensorValueDN<Real> tensor_ad_prop;
+  Real scalar_reg_prop;
+  VectorValue<Real> vector_reg_prop;
+  TensorValue<Real> tensor_reg_prop;
+
+  scalar_ad_prop = 1.;
+  scalar_ad_prop *= scalar_ad_prop;
+  scalar_ad_prop = scalar_ad_prop * scalar_ad_prop;
+
+  // vector_ad_prop = scalar_ad_prop * RealVectorValue(1., 1., 1.);
+  scalar_ad_prop = vector_ad_prop * vector_ad_prop;
+  scalar_ad_prop = operator*<VectorValue, Real>(vector_ad_prop, vector_ad_prop);
+  vector_ad_prop *= 2.;
+  // vector_ad_prop = 2. * vector_ad_prop + vector_ad_prop * 2.;
+
+  // tensor_ad_prop =
+  //     scalar_ad_prop * RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.);
+  // vector_ad_prop = tensor_ad_prop * vector_ad_prop;
+  // tensor_ad_prop *= 2.;
+  // tensor_ad_prop *= tensor_ad_prop;
+  // tensor_ad_prop = tensor_ad_prop * tensor_ad_prop;
+  // tensor_ad_prop = 2. * tensor_ad_prop + tensor_ad_prop * 2.;
+
+  // scalar_reg_prop = scalar_ad_prop;
+  // vector_reg_prop = vector_ad_prop;
+  // tensor_reg_prop = tensor_ad_prop;
 }
