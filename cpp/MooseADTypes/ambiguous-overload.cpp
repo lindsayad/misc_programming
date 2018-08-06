@@ -1,4 +1,4 @@
-#include "MooseADTypes.h"
+#include "MooseTypes.h"
 
 #include <iostream>
 #include <vector>
@@ -6,7 +6,6 @@
 template <typename T> using vec = std::vector<T>;
 typedef VectorValue<Real> RealVectorValue;
 typedef TensorValue<Real> RealTensorValue;
-using MetaPhysicL::IsOperable;
 
 // template <typename T> vec<T> operator*(const T &scalar, const vec<T> &vector)
 // {
@@ -42,8 +41,8 @@ int main() {
   // auto final = intermed * vector_dual_number;
 
   ScalarDN<Real> scalar_ad_prop;
-  VectorValueDN<Real> vector_ad_prop;
-  TensorValueDN<Real> tensor_ad_prop;
+  VectorDN<Real> vector_ad_prop;
+  TensorDN<Real> tensor_ad_prop;
   Real scalar_reg_prop;
   VectorValue<Real> vector_reg_prop;
   TensorValue<Real> tensor_reg_prop;
