@@ -53,32 +53,33 @@ int main() {
   scalar_ad_prop = scalar_ad_prop * scalar_ad_prop;
 
   vector_ad_prop = scalar_ad_prop * RealVectorValue(1., 1., 1.);
-  // scalar_ad_prop = vector_ad_prop * vector_ad_prop;
-  // vector_ad_prop *= 2.;
-  // vector_ad_prop = 2. * vector_ad_prop + vector_ad_prop * 2.;
+  auto intermed = vector_ad_prop * vector_ad_prop;
+  scalar_ad_prop = intermed;
+  vector_ad_prop *= 2.;
+  vector_ad_prop = 2. * vector_ad_prop + vector_ad_prop * 2.;
 
-  // tensor_ad_prop =
-  //     scalar_ad_prop * RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.);
+  tensor_ad_prop =
+      scalar_ad_prop * RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.);
 
-  // vector_ad_prop = tensor_ad_prop * vector_ad_prop;
+  vector_ad_prop = tensor_ad_prop * vector_ad_prop;
 
-  // NumberArray<AD_MAX_DOFS_PER_ELEM, TensorValue<Real>> d_tensor{
-  //     RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.)};
-  // NumberArray<AD_MAX_DOFS_PER_ELEM, VectorValue<Real>> d_vector{
-  //     RealVectorValue(1., 1., 1.)};
-  // auto tensor_result = tensor_reg_prop * d_tensor;
-  // TypeTensor<Real> type_tensor_prop(tensor_reg_prop);
-  // type_tensor_prop *= type_tensor_prop;
-  // tensor_reg_prop *= tensor_reg_prop;
-  // auto tensor_result2 = d_tensor * tensor_reg_prop;
+  NumberArray<AD_MAX_DOFS_PER_ELEM, TensorValue<Real>> d_tensor{
+      RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.)};
+  NumberArray<AD_MAX_DOFS_PER_ELEM, VectorValue<Real>> d_vector{
+      RealVectorValue(1., 1., 1.)};
+  auto tensor_result = tensor_reg_prop * d_tensor;
+  TypeTensor<Real> type_tensor_prop(tensor_reg_prop);
+  type_tensor_prop *= type_tensor_prop;
+  tensor_reg_prop *= tensor_reg_prop;
+  auto tensor_result2 = d_tensor * tensor_reg_prop;
 
-  // tensor_ad_prop *= 2.;
-  // tensor_ad_prop *= tensor_ad_prop;
-  // tensor_ad_prop = tensor_ad_prop * tensor_ad_prop;
-  // tensor_ad_prop = 2. * tensor_ad_prop + tensor_ad_prop * 2.;
-  // tensor_ad_prop = 2. * tensor_ad_prop - tensor_ad_prop * 2.;
+  tensor_ad_prop *= 2.;
+  tensor_ad_prop *= tensor_ad_prop;
+  tensor_ad_prop = tensor_ad_prop * tensor_ad_prop;
+  tensor_ad_prop = 2. * tensor_ad_prop + tensor_ad_prop * 2.;
+  tensor_ad_prop = 2. * tensor_ad_prop - tensor_ad_prop * 2.;
 
-  // scalar_reg_prop = scalar_ad_prop;
-  // vector_reg_prop = vector_ad_prop;
-  // tensor_reg_prop = tensor_ad_prop;
+  scalar_reg_prop = scalar_ad_prop;
+  vector_reg_prop = vector_ad_prop;
+  tensor_reg_prop = tensor_ad_prop;
 }
