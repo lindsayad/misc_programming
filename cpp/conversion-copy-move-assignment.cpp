@@ -28,6 +28,7 @@ public:
   A<T> &operator=(const A<T> &a) {
     _data = a._data;
     std::cout << "Copy assignment operator being called\n";
+    return *this;
   }
 
   T _data;
@@ -52,6 +53,8 @@ int main() {
   int &b = d;
   int c = 1;
   b = c;
+  const int &e = d;
+  int f = e;
 
   A<double> a2;
   ref = a2;
