@@ -81,4 +81,7 @@ int main() {
   scalar_reg_prop = scalar_ad_prop;
   vector_reg_prop = vector_ad_prop;
   tensor_reg_prop = tensor_ad_prop;
+
+  ADRankTwoTensor ad_rnk2_tensor;
+  // RankTwoTensor rnk2_tensor(ad_rnk2_tensor);
 }

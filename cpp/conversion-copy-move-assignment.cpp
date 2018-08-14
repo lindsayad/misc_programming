@@ -34,6 +34,39 @@ public:
   T _data;
 };
 
+class MyInt {
+public:
+  MyInt(int x) : _x(x) { std::cout << "Calling int conversion constructor\n"; }
+
+  MyInt(const MyInt &my_int) : _x(my_int._x) {
+    std::cout << "Calling copy constructor\n";
+  }
+
+  MyInt &operator=(const MyInt &my_int) {
+    std::cout << "Calling copy assignment operator\n";
+    _x = my_int._x;
+    return *this;
+  }
+
+private:
+  int _x;
+};
+
+class MyDouble {
+public:
+  operator MyInt() {
+    std::cout << "Calling operator MyInt conversion\n";
+    return MyInt(_x);
+  }
+
+  MyDouble(double x) : _x(x) {
+    std::cout << "Calling double conversion constructor\n";
+  }
+
+private:
+  double _x;
+};
+
 int main() {
   std::map<unsigned, A<double>> m;
   m[0] = A<double>{2};
@@ -63,4 +96,7 @@ int main() {
   *ref._data = 10;
   std::cout << "a data after is " << a._data << std::endl;
   std::cout << "a2 data after is " << a2._data << std::endl;
+
+  MyDouble my_double(5);
+  MyInt my_int(my_double);
 }
