@@ -67,19 +67,30 @@ struct B {
   void noArgs() { do_all_the_things(std::function<void(D &)>(&D::noArgs), a); }
 };
 
+#define ForwardToMemberDecl(methodName)                                        \
+  template <class... Args>                                                     \
+  auto methodName(Args &&... args)->decltype(a.methodName(args...))
+
+#define ForwardToMemberDef(methodName)                                         \
+  template <class... Args>                                                     \
+  auto E::methodName(Args &&... args)->decltype(a.methodName(args...)) {       \
+    do_all_the_things2(&D::methodName, a, std::forward<Args>(args)...);        \
+  }                                                                            \
+  void ANONYMOUS_FUNCTION()
+
 struct E {
   D a;
 
-  void twoArgs(const int &arg1, const int &arg2) {
-    do_all_the_things2(&D::twoArgs, a, arg1, arg2);
-  }
-
-  void oneArg(const int &arg1) { do_all_the_things2(&D::oneArg, a, arg1); }
-
-  void noArgs() { do_all_the_things2(&D::noArgs, a); }
-
-  int returnAnInt() { do_all_the_things2(&D::returnAnInt, a); }
+  ForwardToMemberDecl(twoArgs);
+  ForwardToMemberDecl(oneArg);
+  ForwardToMemberDecl(noArgs);
+  ForwardToMemberDecl(returnAnInt);
 };
+
+ForwardToMemberDef(twoArgs);
+ForwardToMemberDef(oneArg);
+ForwardToMemberDef(noArgs);
+ForwardToMemberDef(returnAnInt);
 
 int main() {
   A a;
