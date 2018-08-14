@@ -25,6 +25,8 @@ typedef TensorValue<Real> RealTensorValue;
 //   return return_vec;
 // }
 
+PerfLog Moose::perf_log("MooseADTypes");
+
 int main() {
   // double x = 5;
   // std::vector<double> vec(10, 1);
@@ -43,9 +45,6 @@ int main() {
   ScalarDN<Real> scalar_ad_prop;
   VectorDN<Real> vector_ad_prop;
   TensorDN<Real> tensor_ad_prop;
-  Real scalar_reg_prop;
-  VectorValue<Real> vector_reg_prop;
-  TensorValue<Real> tensor_reg_prop;
 
   scalar_ad_prop = 1.;
   scalar_ad_prop *= scalar_ad_prop;
@@ -62,26 +61,19 @@ int main() {
 
   vector_ad_prop = tensor_ad_prop * vector_ad_prop;
 
-  NumberArray<AD_MAX_DOFS_PER_ELEM, TensorValue<Real>> d_tensor{
-      RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.)};
-  NumberArray<AD_MAX_DOFS_PER_ELEM, VectorValue<Real>> d_vector{
-      RealVectorValue(1., 1., 1.)};
-  auto tensor_result = tensor_reg_prop * d_tensor;
-  TypeTensor<Real> type_tensor_prop(tensor_reg_prop);
-  type_tensor_prop *= type_tensor_prop;
-  tensor_reg_prop *= tensor_reg_prop;
-  auto tensor_result2 = d_tensor * tensor_reg_prop;
-
   tensor_ad_prop *= 2.;
   tensor_ad_prop *= tensor_ad_prop;
   tensor_ad_prop = tensor_ad_prop * tensor_ad_prop;
   tensor_ad_prop = 2. * tensor_ad_prop + tensor_ad_prop * 2.;
   tensor_ad_prop = 2. * tensor_ad_prop - tensor_ad_prop * 2.;
 
-  scalar_reg_prop = scalar_ad_prop;
-  vector_reg_prop = vector_ad_prop;
-  tensor_reg_prop = tensor_ad_prop;
-
+  Real scalar_reg_prop(scalar_ad_prop);
+  VectorValue<Real> vector_reg_prop(vector_ad_prop);
+  TensorValue<Real> tensor_reg_prop(tensor_ad_prop);
   ADRankTwoTensor ad_rnk2_tensor;
-  // RankTwoTensor rnk2_tensor(ad_rnk2_tensor);
+  RankTwoTensor rnk2_tensor(ad_rnk2_tensor);
+
+  // scalar_reg_prop = scalar_ad_prop;
+  // vector_reg_prop = vector_ad_prop;
+  // tensor_reg_prop = tensor_ad_prop;
 }
