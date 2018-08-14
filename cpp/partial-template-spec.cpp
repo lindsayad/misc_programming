@@ -55,7 +55,10 @@ template <> struct TensorTraits<Tensor> { static const bool value = true; };
 
 class B {};
 
-template <typename T, typename Enable = void> class DN;
+template <typename T, typename Enable = void> class DN {
+public:
+  DN() { std::cout << "I'm the general version!\n"; }
+};
 
 template <typename T>
 class DN<T, typename std::enable_if<ScalarTraits<T>::value>::type> : public B {
@@ -100,5 +103,5 @@ int main() {
   DN<double> dn;
   DN<Vector<double>> vector_dn;
   DN<Tensor<double>> tensor_dn;
-  // DN<int> dn_int; // no definition
+  DN<int> dn_int; // no definition
 }
