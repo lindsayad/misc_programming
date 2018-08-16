@@ -3,7 +3,8 @@
 #include <iostream>
 #include <vector>
 
-template <typename T> using vec = std::vector<T>;
+template <typename T>
+using vec = std::vector<T>;
 typedef VectorValue<Real> RealVectorValue;
 typedef TensorValue<Real> RealTensorValue;
 
@@ -27,7 +28,9 @@ typedef TensorValue<Real> RealTensorValue;
 
 PerfLog Moose::perf_log("MooseADTypes");
 
-int main() {
+int
+main()
+{
   // double x = 5;
   // std::vector<double> vec(10, 1);
   // operator*<double>(x *x, vec);
@@ -56,8 +59,7 @@ int main() {
   vector_ad_prop *= 2.;
   vector_ad_prop = 2. * vector_ad_prop + vector_ad_prop * 2.;
 
-  tensor_ad_prop =
-      scalar_ad_prop * RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.);
+  tensor_ad_prop = scalar_ad_prop * RealTensorValue(1., 1., 1., 1., 1., 1., 1., 1., 1.);
 
   vector_ad_prop = tensor_ad_prop * vector_ad_prop;
 
@@ -72,6 +74,8 @@ int main() {
   TensorValue<Real> tensor_reg_prop(tensor_ad_prop);
   ADRankTwoTensor ad_rnk2_tensor;
   RankTwoTensor rnk2_tensor(ad_rnk2_tensor);
+
+  ad_rnk2_tensor(0, 0);
 
   // scalar_reg_prop = scalar_ad_prop;
   // vector_reg_prop = vector_ad_prop;
