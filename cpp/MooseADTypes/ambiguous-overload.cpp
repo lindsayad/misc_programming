@@ -28,6 +28,24 @@ typedef TensorValue<Real> RealTensorValue;
 
 PerfLog Moose::perf_log("MooseADTypes");
 
+void
+do_nothing(const TypeVector<Real> &)
+{
+}
+
+class A
+{
+};
+
+class B : public A
+{
+};
+
+void
+do_nothing(const A &)
+{
+}
+
 int
 main()
 {
@@ -76,6 +94,19 @@ main()
   RankTwoTensor rnk2_tensor(ad_rnk2_tensor);
 
   ad_rnk2_tensor(0, 0);
+  const ADRankTwoTensor const_rnk2;
+  const_rnk2(0, 0);
+
+  std::vector<Real> eigvals;
+  RankTwoTensor eigvecs;
+  ad_rnk2_tensor.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
+
+  RealTensorValue rot;
+  ADRankFourTensor ad_rnk4;
+  ad_rnk4.rotate(rot);
+
+  B b;
+  do_nothing(b);
 
   // scalar_reg_prop = scalar_ad_prop;
   // vector_reg_prop = vector_ad_prop;
