@@ -16,8 +16,9 @@ template<std::size_t N>
 class B
 {
 public:
-  // B() {}
-  B() : _data() {}
+  B() {}
+  B(bool /*arg*/) : _data() {}
+  // B() : _data() {}
   int get_data(unsigned index) {return _data[index];}
 
 private:
@@ -33,6 +34,7 @@ int main()
   std::cout << z << std::endl;
 
   B<5> b;
+  // B<5> b(true);
   int zephyr = b.get_data(4);
   std::cout << zephyr << std::endl;
 }
