@@ -1,9 +1,15 @@
 #include <mpi.h>
-#include <stdio.h>
+#include <iostream>
 
 int main(int argc, char** argv) {
   // Initialize the MPI environment
   MPI_Init(NULL, NULL);
+
+  MPI_Comm world = MPI_COMM_WORLD;
+  MPI_Comm self = MPI_COMM_SELF;
+
+  std::cout << world << std::endl;
+  std::cout << self << std::endl;
 
   // Get the number of processes
   int world_size;
