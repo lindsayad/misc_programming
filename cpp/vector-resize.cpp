@@ -25,4 +25,5 @@ int main() {
   A a;
   // vec.resize(1, std::move(a));
   vec.emplace_back(A());
+  std::vector<double> b{1, 2, 3, 4, 5};
 }
