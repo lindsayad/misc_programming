@@ -12,5 +12,7 @@ main()
   is_nan = std::isnan(c.imag());
 
   std::complex<double> zero = 0;
-  std::cout << (zero == 0) << std::endl;
+  std::cout << (zero == std::complex<double>(0)) << std::endl;
+
+  auto new_complex = std::complex<double>(0);
 }

@@ -1,5 +1,3 @@
-#include <iostream>
-
 template <typename T, typename T2, typename enable = void>
 struct CompareTypes;
 template <typename T2>
