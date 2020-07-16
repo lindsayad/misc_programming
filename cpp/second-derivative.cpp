@@ -68,4 +68,42 @@ int main() {
   std::cout << "first derivatives again are " << x2y3.value().derivatives()
             << std::endl;
   std::cout << "function value is " << x2y3.value().value() << std::endl;
+
+  // Finally let's look at how to obtain cross-derivatives!
+
+  // Construct "x" variable
+  DualNumber<DualNumber<double, NumberArray<2, double>>,
+             NumberArray<2, DualNumber<double, NumberArray<2, double>>>>
+      xc = 4;
+
+  // Here we seed the zeroth component of the first derivatives vector for our
+  // "x" variable
+  xc.derivatives()[0].value() = 1.;
+  xc.value().derivatives()[0] = 1.;
+
+  // Construct "y" variable
+  DualNumber<DualNumber<double, NumberArray<2, double>>,
+             NumberArray<2, DualNumber<double, NumberArray<2, double>>>>
+      yc = 5;
+
+  // Here we seed the first component of the first derivatives vector for our
+  // "y" variable
+  yc.derivatives()[1].value() = 1.;
+  yc.value().derivatives()[1] = 1.;
+
+  auto x2y3c = xc * xc * yc * yc * yc;
+  std::cout << "xx derivative is " << x2y3c.derivatives()[0].derivatives()[0]
+            << std::endl;
+  std::cout << "xy derivative is " << x2y3c.derivatives()[0].derivatives()[1]
+            << std::endl;
+  std::cout << "yx derivative is " << x2y3c.derivatives()[1].derivatives()[0]
+            << std::endl;
+  std::cout << "yy derivative is " << x2y3c.derivatives()[1].derivatives()[1]
+            << std::endl;
+
+  std::cout << "first derivatives are {" << x2y3c.derivatives()[0].value()
+            << "," << x2y3c.derivatives()[1].value() << "}" << std::endl;
+  std::cout << "first derivatives again are " << x2y3c.value().derivatives()
+            << std::endl;
+  std::cout << "function value is " << x2y3c.value().value() << std::endl;
 }
