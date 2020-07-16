@@ -2,5 +2,5 @@
 
 int main()
 {
-  int i = function();
+  /* int i = function(); */
 }

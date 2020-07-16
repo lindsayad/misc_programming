@@ -1,39 +1,22 @@
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
-void foo()
-{
-  throw std::exception();
-}
+void foo() { throw std::domain_error("You made a mistake you dummy"); }
 
-void bar()
-{
-  try
-  {
+void bar() {
+  try {
     foo();
-  }
-  catch (std::logic_error &)
-  {
-    std::cout << "We caught a logic error\n";
+  } catch (std::runtime_error &) {
+    std::cout << "We caught a run-time exception\n";
   }
 }
 
-int main()
-{
-  try
-  {
+int main() {
+  try {
     bar();
-  }
-  catch (std::domain_error &)
-  {
+  } catch (std::domain_error &) {
     std::cout << "We caught a domain error\n";
-  }
-  catch (std::runtime_error &)
-  {
-    std::cout << "We caught a runtime_error\n";
-  }
-  catch (std::exception &)
-  {
+  } catch (std::logic_error &) {
     std::cout << "We caught the exception\n";
   }
 }

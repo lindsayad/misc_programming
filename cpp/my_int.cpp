@@ -38,6 +38,7 @@ double operator*(MyInt &i, double x) {
 int main() {
   MyInt i(1);
   double x = 2;
+  int;
   std::cout << x * i << std::endl;
   std::cout << i * x << std::endl;
   std::cout << i.operator*(x) << std::endl;
