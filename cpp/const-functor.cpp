@@ -2,20 +2,6 @@
 #include <memory>
 #include <vector>
 
-class A {
-public:
-  void foo() {}
-
-  void bar() const {
-    auto method_scope = [this]() mutable
-      {
-        foo();
-      };
-
-    method_scope();
-  }
-};
-
 // Per https://en.cppreference.com/w/cpp/language/lambda there is only ever one
 // operator() method defined in a closure. If a lambda is marked as mutable,
 // then operator() will be non-const...unless it seems as shown below it doesn't
@@ -29,6 +15,23 @@ void push_parallel_packed_range(const ActionFunctor &act_on_data,
   act_on_data(data);
 }
 
+class A {
+public:
+  void foo() {
+    int a = 0;
+
+    auto non_const_method_scope = [this](int &)
+                                    {
+                                      baz();
+                                    };
+
+    push_parallel_packed_range(non_const_method_scope, a);
+  }
+  void baz() {}
+
+  void bar() const {}
+};
+
 /**
  * Require this overload in order to compile
  *
@@ -39,11 +42,11 @@ void push_parallel_packed_range(const ActionFunctor &act_on_data,
  *     push_parallel_packed_range(mutable_ref_captures, from);
  *
  */
-template <typename ActionFunctor, typename DataType>
-void push_parallel_packed_range(ActionFunctor &act_on_data, DataType &data) {
-  std::cout << "non-const overload\n";
-  act_on_data(data);
-}
+// template <typename ActionFunctor, typename DataType>
+// void push_parallel_packed_range(ActionFunctor &act_on_data, DataType &data) {
+//   std::cout << "non-const overload\n";
+//   act_on_data(data);
+// }
 
 int main() {
   std::vector<std::unique_ptr<A>> to, from;
@@ -90,12 +93,14 @@ int main() {
 
   push_parallel_packed_range(my_lamb, from);
   push_parallel_packed_range(mutable_no_captures, from);
-  push_parallel_packed_range(mutable_ref_captures, from);
-  push_parallel_packed_range(mutable_lamb, from);
+  // push_parallel_packed_range(mutable_ref_captures, from);
+  // push_parallel_packed_range(mutable_lamb, from);
 
   // A general note: if we didn't mark my_lamb or mutable_lamb_no_captures as
   // const, then the non-const push_parallel_packed_range overload is the
   // overload that gets called, but everything is hunky-dory because even though
   // the lambda closures operator() method is const, non-const objects can of
   // course call const methods
+
+  a.foo();
 }
