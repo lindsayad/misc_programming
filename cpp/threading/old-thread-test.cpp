@@ -12,17 +12,13 @@ std::vector<int> container;
 void
 fillContainer()
 {
-  bool tmp = done.load(std::memory_order_relaxed);
-  std::atomic_thread_fence(std::memory_order_acquire);
-  if (!tmp)
+  if (!done)
   {
     std::lock_guard<std::mutex> lock(cv_m);
-    tmp = done.load(std::memory_order_relaxed);
-    if (!tmp)
+    if (!done)
     {
       container = {1, 2, 3, 4};
-      std::atomic_thread_fence(std::memory_order_release);
-      done.store(true, std::memory_order_relaxed);
+      done = true;
     }
   }
 
@@ -32,22 +28,7 @@ fillContainer()
 int
 main()
 {
-  for (unsigned int i = 0; i < 1; ++i)
-  {
-    {
-      std::thread t1(fillContainer), t2(fillContainer), t3(fillContainer), t4(fillContainer),
-          t5(fillContainer), t6(fillContainer), t7(fillContainer), t8(fillContainer);
-      t1.join();
-      t2.join();
-      t3.join();
-      t4.join();
-      t5.join();
-      t6.join();
-      t7.join();
-      t8.join();
-    }
-
-    container.clear();
-    done = false;
-  }
+  std::thread t1(fillContainer), t2(fillContainer);
+  t1.join();
+  t2.join();
 }
