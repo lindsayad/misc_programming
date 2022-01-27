@@ -12,13 +12,17 @@ std::vector<int> container;
 void
 fillContainer()
 {
-  if (!done)
+  bool tmp = done.load(std::memory_order_relaxed);
+  std::atomic_thread_fence(std::memory_order_acquire);
+  if (!tmp)
   {
     std::lock_guard<std::mutex> lock(cv_m);
-    if (!done)
+    tmp = done.load(std::memory_order_relaxed);
+    if (!tmp)
     {
       container = {1, 2, 3, 4};
-      done = true;
+      std::atomic_thread_fence(std::memory_order_release);
+      done.store(true, std::memory_order_relaxed);
     }
   }
 
