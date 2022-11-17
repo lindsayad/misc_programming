@@ -16,6 +16,7 @@ private:
 
 std::atomic<Singleton *> Singleton::m_instance;
 std::mutex Singleton::m_mutex;
+int a;
 
 Singleton *
 Singleton::getInstance()
@@ -29,10 +30,15 @@ Singleton::getInstance()
     if (tmp == nullptr)
     {
       tmp = new Singleton;
+      a = 5;
       std::atomic_thread_fence(std::memory_order_release);
       m_instance.store(tmp, std::memory_order_relaxed);
     }
   }
+
+  if (tmp)
+    const auto val = a;
+
   return tmp;
 }
 

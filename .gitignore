@@ -1,22 +1,14 @@
-# *log*
-# *~
-# *.png
-# *.jpg
-# *.jpeg
+*log*
+*~
+*.png
+*.jpg
+*.jpeg
 *.out
-# *.csv
-# *.eps
-# *.out
-# *.dbg
-# *#*
-
-*
-!*.c
-!*.cpp
-!*.cc
-!*.hh
-!*.supp
-!*.h
-!*.C
-!*/
+*.csv
+*.eps
+*.out
+*.dbg
 *#*
+*.prof
+*.old
+*.data

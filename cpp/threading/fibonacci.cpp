@@ -1,3 +1,5 @@
+#include <iostream>
+
 int
 fib(int n)
 {
@@ -9,5 +11,6 @@ fib(int n)
 int
 main()
 {
-  fib(42);
+  const auto res = fib(42);
+  std::cout << res << std::endl;
 }

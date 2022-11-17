@@ -1,28 +1,30 @@
 #include <thread>
-#include <vector>
 #include <atomic>
 #include <mutex>
-#include <iostream>
-#include <condition_variable>
 
 std::mutex cv_m;
 std::atomic<bool> done = false;
-std::vector<int> container;
+int a;
 
 void
 fillContainer()
 {
-  if (!done)
+  bool local_done = done.load(std::memory_order_relaxed);
+  std::atomic_thread_fence(std::memory_order_acquire);
+  if (!local_done)
   {
     std::lock_guard<std::mutex> lock(cv_m);
-    if (!done)
+    local_done = done.load(std::memory_order_relaxed);
+    if (!local_done)
     {
-      container = {1, 2, 3, 4};
-      done = true;
+      a = 0;
+      local_done = true;
+      std::atomic_thread_fence(std::memory_order_release);
+      done.store(local_done, std::memory_order_relaxed);
     }
   }
 
-  container.front();
+  const auto val = a;
 }
 
 int
