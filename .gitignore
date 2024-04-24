@@ -12,3 +12,6 @@
 *.prof
 *.old
 *.data
+*.mat
+*.is
+*.vec
