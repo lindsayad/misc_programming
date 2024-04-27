@@ -123,14 +123,22 @@ main(int argc, char ** args)
   PetscCall(MatCreate(PETSC_COMM_SELF, &D));
   PetscCall(MatSetType(D, MATSEQAIJ));
   PetscCall(MatSetSizes(D, condensed_am, condensed_am, condensed_am, condensed_am));
-  static constexpr PetscScalar zero = 0;
+  static constexpr PetscScalar one = 1;
   for (PetscInt i = 0; i < condensed_am; ++i)
-    PetscCall(MatSetValues(D, 1, &i, 1, &i, &zero, INSERT_VALUES));
+    PetscCall(MatSetValues(D, 1, &i, 1, &i, &one, INSERT_VALUES));
   PetscCall(MatAssemblyBegin(D, MAT_FINAL_ASSEMBLY));
   PetscCall(MatAssemblyEnd(D, MAT_FINAL_ASSEMBLY));
   PetscCall(MatCreateVecs(D, &DVec, nullptr));
   PetscCall(MatGetDiagonal(AplusJ, DVec));
-  PetscCall(MatDiagonalSet(D, DVec, INSERT_VALUES));
+  PetscScalar *xx;
+  PetscCall(VecGetArray(DVec, &xx));
+  for (PetscInt i = 0; i < condensed_am; ++i)
+    xx[i] = 1.0 / PetscSqrtReal(PetscAbsScalar(xx[i]));
+  PetscCall(VecRestoreArray(DVec, &xx));
+  PetscCall(MatDiagonalScale(AplusJ, DVec, DVec));
+  PetscCall(MatDiagonalScale(Acondensed, DVec, DVec));
+  PetscCall(MatDiagonalScale(J, DVec, DVec));
+  PetscCall(VecPointwiseMult(b, DVec, b));
   PetscCall(MatDuplicate(Acondensed, MAT_COPY_VALUES, &AplusD));
   PetscCall(MatAXPY(AplusD, alpha, D, SUBSET_NONZERO_PATTERN));
   PetscCall(MatDuplicate(J, MAT_COPY_VALUES, &JplusD));
