@@ -12,7 +12,7 @@ static char help[] = "(Attempts to) apply the 2023 preconditioner of Benzi and F
 int
 main(int argc, char ** args)
 {
-  Mat A, B, Q, Acondensed, Bcondensed, BT, J, AplusJ, QInv, D, AplusD, JplusD;
+  Mat A, B, Q, Acondensed, Bcondensed, BT, J, AplusJ, QInv, I, AplusI, JplusI;
   Vec bound, x, b, Qdiag, DVec;
   PetscBool flg;
   PetscViewer viewer;
@@ -120,15 +120,15 @@ main(int argc, char ** args)
 
   // Compute preconditioner operators
   PetscCall(MatGetLocalSize(Acondensed, &condensed_am, nullptr));
-  PetscCall(MatCreate(PETSC_COMM_SELF, &D));
-  PetscCall(MatSetType(D, MATSEQAIJ));
-  PetscCall(MatSetSizes(D, condensed_am, condensed_am, condensed_am, condensed_am));
+  PetscCall(MatCreate(PETSC_COMM_SELF, &I));
+  PetscCall(MatSetType(I, MATSEQAIJ));
+  PetscCall(MatSetSizes(I, condensed_am, condensed_am, condensed_am, condensed_am));
   static constexpr PetscScalar one = 1;
   for (PetscInt i = 0; i < condensed_am; ++i)
-    PetscCall(MatSetValues(D, 1, &i, 1, &i, &one, INSERT_VALUES));
-  PetscCall(MatAssemblyBegin(D, MAT_FINAL_ASSEMBLY));
-  PetscCall(MatAssemblyEnd(D, MAT_FINAL_ASSEMBLY));
-  PetscCall(MatCreateVecs(D, &DVec, nullptr));
+    PetscCall(MatSetValues(I, 1, &i, 1, &i, &one, INSERT_VALUES));
+  PetscCall(MatAssemblyBegin(I, MAT_FINAL_ASSEMBLY));
+  PetscCall(MatAssemblyEnd(I, MAT_FINAL_ASSEMBLY));
+  PetscCall(MatCreateVecs(I, &DVec, nullptr));
   PetscCall(MatGetDiagonal(AplusJ, DVec));
   PetscScalar *xx;
   PetscCall(VecGetArray(DVec, &xx));
@@ -139,10 +139,10 @@ main(int argc, char ** args)
   PetscCall(MatDiagonalScale(Acondensed, DVec, DVec));
   PetscCall(MatDiagonalScale(J, DVec, DVec));
   PetscCall(VecPointwiseMult(b, DVec, b));
-  PetscCall(MatDuplicate(Acondensed, MAT_COPY_VALUES, &AplusD));
-  PetscCall(MatAXPY(AplusD, alpha, D, SUBSET_NONZERO_PATTERN));
-  PetscCall(MatDuplicate(J, MAT_COPY_VALUES, &JplusD));
-  PetscCall(MatAXPY(JplusD, alpha, D, SUBSET_NONZERO_PATTERN));
+  PetscCall(MatDuplicate(Acondensed, MAT_COPY_VALUES, &AplusI));
+  PetscCall(MatAXPY(AplusI, alpha, I, SUBSET_NONZERO_PATTERN));
+  PetscCall(MatDuplicate(J, MAT_COPY_VALUES, &JplusI));
+  PetscCall(MatAXPY(JplusI, alpha, I, SUBSET_NONZERO_PATTERN));
 
   // Set preconditioner operators
   PetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
@@ -172,11 +172,11 @@ main(int argc, char ** args)
   // We must also set the operators on the PCKSP's otherwise during setup of the composite PC it
   // will detect that its sub-pcs do not have operators attached and then it will attach the system
   // operator
-  PetscCall(PCSetOperators(pckspA, AplusD, AplusD));
-  PetscCall(PCSetOperators(pcA, AplusD, AplusD));
-  PetscCall(PCSetOperators(pckspJ, JplusD, JplusD));
-  PetscCall(PCSetOperators(pcJ, JplusD, JplusD));
-  PetscCall(PCCompositeSpecialSetAlphaMat(pc, D));
+  PetscCall(PCSetOperators(pckspA, AplusI, AplusI));
+  PetscCall(PCSetOperators(pcA, AplusI, AplusI));
+  PetscCall(PCSetOperators(pckspJ, JplusI, JplusI));
+  PetscCall(PCSetOperators(pcJ, JplusI, JplusI));
+  PetscCall(PCCompositeSpecialSetAlphaMat(pc, I));
 
   // Solve
   PetscCall(KSPSetFromOptions(ksp));
@@ -193,9 +193,9 @@ main(int argc, char ** args)
   PetscCall(MatDestroy(&J));
   PetscCall(MatDestroy(&AplusJ));
   PetscCall(MatDestroy(&QInv));
-  PetscCall(MatDestroy(&D));
-  PetscCall(MatDestroy(&AplusD));
-  PetscCall(MatDestroy(&JplusD));
+  PetscCall(MatDestroy(&I));
+  PetscCall(MatDestroy(&AplusI));
+  PetscCall(MatDestroy(&JplusI));
   PetscCall(VecDestroy(&bound));
   PetscCall(VecDestroy(&x));
   PetscCall(VecDestroy(&b));
