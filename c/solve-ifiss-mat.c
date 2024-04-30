@@ -29,8 +29,7 @@ create_identity(PetscInt m, Mat & identity)
 struct SMWPC
 {
   Mat U, UT, In, Ik, aI_plus_gammaUTU;
-  PC smw_pc, smw_cholesky;
-  KSP smw_pc_ksp;
+  PC smw_cholesky;
   PetscReal gamma, alpha;
 
   SMWPC(Mat U_in, Mat In_in, PetscReal gamma_in, PetscReal alpha_in)
@@ -39,7 +38,7 @@ struct SMWPC
       In(In_in),
       Ik(nullptr),
       aI_plus_gammaUTU(nullptr),
-      smw_pc(nullptr),
+      smw_cholesky(nullptr),
       gamma(gamma_in),
       alpha(alpha_in)
   {
@@ -55,8 +54,8 @@ struct SMWPC
       PetscCall(MatDestroy(&Ik));
     if (aI_plus_gammaUTU)
       PetscCall(MatDestroy(&aI_plus_gammaUTU));
-    if (smw_pc)
-      PetscCall(PCDestroy(&smw_pc));
+    if (smw_cholesky)
+      PetscCall(PCDestroy(&smw_cholesky));
 
     PetscFunctionReturn(PETSC_SUCCESS);
   }
@@ -88,16 +87,13 @@ struct SMWPC
     PetscCall(MatScale(aI_plus_gammaUTU, gamma));
     PetscCall(MatAXPY(aI_plus_gammaUTU, alpha, Ik, SUBSET_NONZERO_PATTERN));
 
-    if (!smw_pc)
-      PetscCall(PCCreate(PETSC_COMM_SELF, &smw_pc));
-    PetscCall(PCSetType(smw_pc, PCKSP));
-    PetscCall(PCSetOperators(smw_pc, aI_plus_gammaUTU, aI_plus_gammaUTU));
-    PetscCall(PCKSPGetKSP(smw_pc, &smw_pc_ksp));
-    PetscCall(KSPSetFromOptions(smw_pc_ksp));
-    PetscCall(KSPGetPC(smw_pc_ksp, &smw_cholesky));
+    if (!smw_cholesky)
+      PetscCall(PCCreate(PETSC_COMM_SELF, &smw_cholesky));
     PetscCall(PCSetType(smw_cholesky, PCCHOLESKY));
+    PetscCall(PCSetOperators(smw_cholesky, aI_plus_gammaUTU, aI_plus_gammaUTU));
+    PetscCall(PCSetFromOptions(smw_cholesky));
 
-    PetscCall(PCSetUp(smw_pc));
+    PetscCall(PCSetUp(smw_cholesky));
 
     PetscFunctionReturn(PETSC_SUCCESS);
   }
@@ -111,7 +107,7 @@ struct SMWPC
 
     // First term
     PetscCall(MatMult(UT, x, w2));
-    PetscCall(PCApply(smw_pc, w2, w));
+    PetscCall(PCApply(smw_cholesky, w2, w));
     PetscCall(MatMult(U, w, y));
     PetscCall(VecScale(y, -gamma / alpha));
 
@@ -162,8 +158,8 @@ main(int argc, char ** args)
   PetscInt boundary_indices_size, is_start, is_end, am, an, bm, bn, condensed_am, maxits;
   PetscScalar * boundary_indices_values;
   IS boundary_is, bulk_is;
-  KSP ksp, kspA, kspJ;
-  PC pc, pckspA, pckspJ, pcA, pcJ;
+  KSP ksp;
+  PC pc, pcA, pcJ;
   PetscRandom rctx;
   PetscReal gamma = 100;
   PetscReal alpha = .01;
@@ -290,17 +286,12 @@ main(int argc, char ** args)
   PetscCall(MatAXPY(JplusI, alpha, I, SUBSET_NONZERO_PATTERN));
   PetscCall(MatDiagonalScale(U, DVec, nullptr));
 
-  // Tryout the SMW PC application
+  // Create our SMW context
   SMWPC test_pc(U, I, gamma, alpha);
-  PetscCall(test_pc.setup());
-  Vec test_vec;
-  PetscCall(VecDuplicate(x, &test_vec));
-  PetscCall(test_pc.apply(x, test_vec));
-  PetscCall(VecDestroy(&test_vec));
 
   // Set preconditioner operators
   PetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
-  PetscCall(KSPSetType(ksp, KSPFGMRES));
+  PetscCall(KSPSetType(ksp, KSPGMRES));
   PetscCall(KSPSetOperators(ksp, AplusJ, AplusJ));
   PetscCall(KSPSetNormType(ksp, KSP_NORM_UNPRECONDITIONED));
   PetscCall(KSPGetTolerances(ksp, nullptr, nullptr, &dtol, &maxits));
@@ -309,34 +300,20 @@ main(int argc, char ** args)
   PetscCall(KSPGetPC(ksp, &pc));
   PetscCall(PCSetType(pc, PCCOMPOSITE));
   PetscCall(PCCompositeSetType(pc, PC_COMPOSITE_SPECIAL));
-  PetscCall(PCCompositeAddPCType(pc, PCKSP));
-  PetscCall(PCCompositeAddPCType(pc, PCKSP));
-  PetscCall(PCCompositeGetPC(pc, 0, &pckspA));
-  PetscCall(PCCompositeGetPC(pc, 1, &pckspJ));
-  PetscCall(PCKSPGetKSP(pckspA, &kspA));
-  PetscCall(PCKSPGetKSP(pckspJ, &kspJ));
-  PetscCall(KSPSetTolerances(kspA, 1e-8, 1e-50, dtol, maxits));
-  PetscCall(KSPSetTolerances(kspJ, 1e-8, 1e-50, dtol, maxits));
-  PetscCall(KSPGetPC(kspA, &pcA));
-  PetscCall(KSPGetPC(kspJ, &pcJ));
-  PetscCall(PCSetType(pcA, PCLU));
-  PetscCall(PCSetType(pcJ, PCSHELL));
+  PetscCall(PCCompositeAddPCType(pc, PCLU));
+  PetscCall(PCCompositeAddPCType(pc, PCSHELL));
+  PetscCall(PCCompositeGetPC(pc, 0, &pcA));
+  PetscCall(PCCompositeGetPC(pc, 1, &pcJ));
   // PetscCall(PCFactorSetMatSolverType(pcA, MATSOLVERMUMPS));
-  // We must also set the operators on the PCKSP's otherwise during setup of the composite PC it
-  // will detect that its sub-pcs do not have operators attached and then it will attach the system
-  // operator
-  PetscCall(PCSetOperators(pckspA, AplusI, AplusI));
+
   PetscCall(PCSetOperators(pcA, AplusI, AplusI));
-  PetscCall(PCSetOperators(pckspJ, JplusI, JplusI));
-  PetscCall(PCCompositeSpecialSetAlphaMat(pc, I));
   PetscCall(PCShellSetContext(pcJ, &test_pc));
   PetscCall(PCShellSetApply(pcJ, smw_apply));
   PetscCall(PCShellSetSetUp(pcJ, smw_setup));
+  PetscCall(PCCompositeSpecialSetAlphaMat(pc, I));
 
   // Solve
   PetscCall(KSPSetFromOptions(ksp));
-  PetscCall(KSPSetFromOptions(kspA));
-  PetscCall(KSPSetFromOptions(kspJ));
   PetscCall(KSPSolve(ksp, b, x));
 
   PetscCall(MatDestroy(&A));
