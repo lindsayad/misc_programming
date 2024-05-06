@@ -160,7 +160,6 @@ main(int argc, char ** args)
   IS boundary_is, bulk_is;
   KSP ksp;
   PC pc, pcA, pcJ;
-  PetscRandom rctx;
   PetscReal gamma = 100;
   PetscReal alpha = .01;
   PetscReal dtol;
@@ -261,9 +260,7 @@ main(int argc, char ** args)
 
   // Create x and b
   PetscCall(MatCreateVecs(AplusJ, &x, &b));
-  PetscCall(PetscRandomCreate(PETSC_COMM_SELF, &rctx));
-  PetscCall(VecSetRandom(x, rctx));
-  PetscCall(PetscRandomDestroy(&rctx));
+  PetscCall(VecSet(x, 1));
   PetscCall(MatMult(AplusJ, x, b));
 
   // Compute preconditioner operators
