@@ -150,7 +150,7 @@ int
 main(int argc, char ** args)
 {
   Mat A, B, Q, Acondensed, Bcondensed, BT, J, AplusJ, QInv, I, AplusI, JplusI, U;
-  Vec bound, x, b, Qdiag, DVec;
+  Vec bound, x, b_non_condensed, b, Qdiag, DVec;
   PetscBool flg;
   PetscViewer viewer;
   char file[PETSC_MAX_PATH_LEN];
@@ -160,7 +160,7 @@ main(int argc, char ** args)
   IS boundary_is, bulk_is;
   KSP ksp;
   PC pc, pcA, pcJ;
-  PetscReal gamma = 100;
+  PetscReal gamma = 0.1;
   PetscReal alpha = .01;
   PetscReal dtol;
 
@@ -185,18 +185,28 @@ main(int argc, char ** args)
     PetscFunctionReturn(PETSC_SUCCESS);
   };
 
+  auto create_and_load_vec = [&flg, &viewer, &file](const std::string & vec_name, Vec & vec)
+  {
+    PetscFunctionBeginUser;
+
+    PetscCall(PetscOptionsGetString(
+        nullptr, nullptr, std::string("-f" + vec_name).c_str(), file, sizeof(file), &flg));
+    PetscCheck(flg, PETSC_COMM_SELF, PETSC_ERR_USER, "Must indicate file with the -f<name> option");
+    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_SELF, file, FILE_MODE_READ, &viewer));
+    PetscCall(VecCreate(PETSC_COMM_SELF, &vec));
+    PetscCall(PetscObjectSetName((PetscObject)vec, vec_name.c_str()));
+    PetscCall(VecSetType(vec, VECSEQ));
+    PetscCall(VecLoad(vec, viewer));
+    PetscCall(PetscViewerDestroy(&viewer));
+    PetscFunctionReturn(PETSC_SUCCESS);
+  };
+
   create_and_load_mat("Anst", A);
   create_and_load_mat("Bst", B);
   create_and_load_mat("Q", Q);
+  create_and_load_vec("bound", bound);
+  create_and_load_vec("b", b_non_condensed);
 
-  PetscCall(PetscOptionsGetString(nullptr, nullptr, "-fbound", file, sizeof(file), &flg));
-  PetscCheck(flg, PETSC_COMM_SELF, PETSC_ERR_USER, "Must indicate file with the -fbound option");
-  PetscCall(PetscViewerBinaryOpen(PETSC_COMM_SELF, file, FILE_MODE_READ, &viewer));
-  PetscCall(VecCreate(PETSC_COMM_SELF, &bound));
-  PetscCall(PetscObjectSetName((PetscObject)bound, "bound"));
-  PetscCall(VecSetType(bound, VECSEQ));
-  PetscCall(VecLoad(bound, viewer));
-  PetscCall(PetscViewerDestroy(&viewer));
   PetscCall(VecGetLocalSize(bound, &boundary_indices_size));
   PetscCall(PetscMalloc1(2 * boundary_indices_size, &boundary_indices));
   PetscCall(VecGetArray(bound, &boundary_indices_values));
@@ -228,6 +238,9 @@ main(int argc, char ** args)
   PetscCall(MatGetLocalSize(Bcondensed, &bm, &bn));
   assert(am == an);
   assert(am == bm);
+  PetscCall(VecGetSubVector(b_non_condensed, bulk_is, &b));
+  PetscCall(VecGetLocalSize(b, &am));
+  assert(am == an);
 
   // Create QInv
   PetscCall(MatCreateVecs(Q, &Qdiag, nullptr));
@@ -258,10 +271,8 @@ main(int argc, char ** args)
   // Create U
   PetscCall(MatMatMult(Bcondensed, QInv, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &U));
 
-  // Create x and b
-  PetscCall(MatCreateVecs(AplusJ, &x, &b));
-  PetscCall(VecSet(x, 1));
-  PetscCall(MatMult(AplusJ, x, b));
+  // Create x
+  PetscCall(MatCreateVecs(AplusJ, &x, nullptr));
 
   // Compute preconditioner operators
   PetscCall(MatGetLocalSize(Acondensed, &condensed_am, nullptr));
@@ -293,7 +304,7 @@ main(int argc, char ** args)
   PetscCall(KSPSetNormType(ksp, KSP_NORM_UNPRECONDITIONED));
   PetscCall(KSPGetTolerances(ksp, nullptr, nullptr, &dtol, &maxits));
   PetscCall(KSPSetTolerances(ksp, 1e-6, 1e-50, dtol, maxits));
-  PetscCall(KSPGMRESSetRestart(ksp, 300));
+  PetscCall(KSPGMRESSetRestart(ksp, 1000));
   PetscCall(KSPGetPC(ksp, &pc));
   PetscCall(PCSetType(pc, PCCOMPOSITE));
   PetscCall(PCCompositeSetType(pc, PC_COMPOSITE_SPECIAL));
@@ -313,6 +324,7 @@ main(int argc, char ** args)
   PetscCall(KSPSetFromOptions(ksp));
   PetscCall(KSPSolve(ksp, b, x));
 
+  PetscCall(VecRestoreSubVector(b_non_condensed, bulk_is, &b));
   PetscCall(MatDestroy(&A));
   PetscCall(MatDestroy(&B));
   PetscCall(MatDestroy(&Q));
@@ -328,7 +340,7 @@ main(int argc, char ** args)
   PetscCall(MatDestroy(&U));
   PetscCall(VecDestroy(&bound));
   PetscCall(VecDestroy(&x));
-  PetscCall(VecDestroy(&b));
+  PetscCall(VecDestroy(&b_non_condensed));
   PetscCall(VecDestroy(&Qdiag));
   PetscCall(VecDestroy(&DVec));
   PetscCall(ISDestroy(&boundary_is));
