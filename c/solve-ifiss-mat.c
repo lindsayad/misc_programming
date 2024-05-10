@@ -9,6 +9,10 @@ static char help[] = "(Attempts to) apply the 2023 preconditioner of Benzi and F
 #include <iostream>
 #include <cassert>
 
+#ifdef HAVE_GPERFTOOLS
+#include "gperftools/profiler.h"
+#endif
+
 int
 main(int argc, char ** args)
 {
@@ -18,7 +22,7 @@ main(int argc, char ** args)
   PetscViewer viewer;
   char file[PETSC_MAX_PATH_LEN];
   PetscInt * boundary_indices;
-  PetscInt boundary_indices_size, is_start, is_end, am, an, bm, bn, condensed_am, maxits;
+  PetscInt boundary_indices_size, am, an, bm, bn, condensed_am, maxits, astart, aend;
   PetscScalar * boundary_indices_values;
   IS boundary_is, bulk_is;
   KSP ksp;
@@ -27,9 +31,28 @@ main(int argc, char ** args)
   PetscScalar gamma = 100;
   PetscScalar alpha = .01;
   PetscReal dtol;
+  PetscMPIInt rank;
 
   PetscFunctionBeginUser;
   PetscCall(PetscInitialize(&argc, &args, (char *)0, help));
+  PetscCallMPI(MPI_Comm_rank(PETSC_COMM_WORLD, &rank));
+
+#ifdef HAVE_GPERFTOOLS
+  bool has_cpu_profiling = false;
+  static std::string cpu_profile_file;
+
+  if (std::getenv("PROFILE_BASE"))
+  {
+    has_cpu_profiling = true;
+    cpu_profile_file = std::getenv("PROFILE_BASE") + std::to_string(rank) + ".prof";
+  }
+
+  if (has_cpu_profiling)
+  {
+    const auto success = ProfilerStart(cpu_profile_file.c_str());
+    assert(success);
+  }
+#endif
 
   auto create_and_load_mat = [&flg, &viewer, &file](const std::string & mat_name, Mat & mat)
   {
@@ -38,10 +61,10 @@ main(int argc, char ** args)
     PetscCall(PetscOptionsGetString(
         nullptr, nullptr, std::string("-f" + mat_name).c_str(), file, sizeof(file), &flg));
     PetscCheck(
-        flg, PETSC_COMM_SELF, PETSC_ERR_USER, "Must indicate file with the -f<mat_name> option");
-    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_SELF, file, FILE_MODE_READ, &viewer));
-    PetscCall(MatCreate(PETSC_COMM_SELF, &mat));
-    PetscCall(MatSetType(mat, MATSEQAIJ));
+        flg, PETSC_COMM_WORLD, PETSC_ERR_USER, "Must indicate file with the -f<mat_name> option");
+    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer));
+    PetscCall(MatCreate(PETSC_COMM_WORLD, &mat));
+    PetscCall(MatSetType(mat, MATMPIAIJ));
     PetscCall(PetscObjectSetName((PetscObject)mat, mat_name.c_str()));
     PetscCall(MatSetFromOptions(mat));
     PetscCall(MatLoad(mat, viewer));
@@ -54,35 +77,63 @@ main(int argc, char ** args)
   create_and_load_mat("Q", Q);
 
   PetscCall(PetscOptionsGetString(nullptr, nullptr, "-fbound", file, sizeof(file), &flg));
-  PetscCheck(flg, PETSC_COMM_SELF, PETSC_ERR_USER, "Must indicate file with the -fbound option");
-  PetscCall(PetscViewerBinaryOpen(PETSC_COMM_SELF, file, FILE_MODE_READ, &viewer));
-  PetscCall(VecCreate(PETSC_COMM_SELF, &bound));
-  PetscCall(PetscObjectSetName((PetscObject)bound, "bound"));
-  PetscCall(VecSetType(bound, VECSEQ));
-  PetscCall(VecLoad(bound, viewer));
-  PetscCall(PetscViewerDestroy(&viewer));
-  PetscCall(VecGetLocalSize(bound, &boundary_indices_size));
-  PetscCall(PetscMalloc1(2 * boundary_indices_size, &boundary_indices));
-  PetscCall(VecGetArray(bound, &boundary_indices_values));
-  for (PetscInt i = 0; i < boundary_indices_size; ++i)
-    // Matlab uses 1-based indexing
-    boundary_indices[i] = (PetscInt)boundary_indices_values[i] - 1;
-  PetscCall(VecRestoreArray(bound, &boundary_indices_values));
-  PetscCall(MatGetOwnershipRange(A, &is_start, &is_end));
-  assert(is_start == 0);
-  // The total number of dofs for a given velocity component
-  const auto nc = is_end / 2;
-  assert((is_end % 2) == 0);
-  // The dof index ordering appears to be all vx dofs and then all vy dofs
-  for (PetscInt i = 0; i < boundary_indices_size; ++i)
-    boundary_indices[i + boundary_indices_size] = boundary_indices[i] + nc;
+  PetscCheck(flg, PETSC_COMM_WORLD, PETSC_ERR_USER, "Must indicate file with the -fbound option");
 
-  PetscCall(ISCreateGeneral(PETSC_COMM_SELF,
-                            2 * boundary_indices_size,
-                            boundary_indices,
-                            PETSC_OWN_POINTER,
-                            &boundary_is));
-  PetscCall(ISComplement(boundary_is, is_start, is_end, &bulk_is));
+  if (rank == 0)
+  {
+    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_SELF, file, FILE_MODE_READ, &viewer));
+    PetscCall(VecCreate(PETSC_COMM_SELF, &bound));
+    PetscCall(PetscObjectSetName((PetscObject)bound, "bound"));
+    PetscCall(VecSetType(bound, VECSEQ));
+    PetscCall(VecLoad(bound, viewer));
+    PetscCall(PetscViewerDestroy(&viewer));
+    PetscCall(VecGetLocalSize(bound, &boundary_indices_size));
+    PetscCall(VecGetArray(bound, &boundary_indices_values));
+  }
+  PetscCallMPI(MPI_Bcast(&boundary_indices_size, 1, MPI_INT, 0, PETSC_COMM_WORLD));
+  if (rank != 0)
+    PetscCall(PetscMalloc1(boundary_indices_size, &boundary_indices_values));
+  PetscCallMPI(
+      MPI_Bcast(boundary_indices_values, boundary_indices_size, MPIU_SCALAR, 0, PETSC_COMM_WORLD));
+
+  PetscCall(MatGetSize(A, &am, nullptr));
+  // The total number of dofs for a given velocity component
+  assert((am % 2) == 0);
+  const auto nc = am / 2;
+  PetscCall(MatGetOwnershipRange(A, &astart, &aend));
+
+  PetscInt num_local_bnd_dofs = 0;
+  PetscCall(PetscMalloc1(2 * boundary_indices_size, &boundary_indices));
+
+  //
+  // The dof index ordering appears to be all vx dofs and then all vy dofs.
+  //
+
+  // First do vx
+  for (PetscInt i = 0; i < boundary_indices_size; ++i)
+  {
+    // Matlab uses 1-based indexing
+    const PetscInt bnd_dof = (PetscInt)boundary_indices_values[i] - 1;
+    if ((bnd_dof >= astart) && (bnd_dof < aend))
+      boundary_indices[num_local_bnd_dofs++] = bnd_dof;
+  }
+
+  // Now vy
+  for (PetscInt i = 0; i < boundary_indices_size; ++i)
+  {
+    // Matlab uses 1-based indexing
+    const PetscInt bnd_dof = ((PetscInt)boundary_indices_values[i] - 1) + nc;
+    if ((bnd_dof >= astart) && (bnd_dof < aend))
+      boundary_indices[num_local_bnd_dofs++] = bnd_dof;
+  }
+  if (rank == 0)
+    PetscCall(VecRestoreArray(bound, &boundary_indices_values));
+  else
+    PetscCall(PetscFree(boundary_indices_values));
+
+  PetscCall(ISCreateGeneral(
+      PETSC_COMM_WORLD, num_local_bnd_dofs, boundary_indices, PETSC_USE_POINTER, &boundary_is));
+  PetscCall(ISComplement(boundary_is, astart, aend, &bulk_is));
 
   PetscCall(MatCreateSubMatrix(A, bulk_is, bulk_is, MAT_INITIAL_MATRIX, &Acondensed));
   // Can't pass null for row index set :-(
@@ -113,16 +164,16 @@ main(int argc, char ** args)
 
   // Create x and b
   PetscCall(MatCreateVecs(AplusJ, &x, &b));
-  PetscCall(PetscRandomCreate(PETSC_COMM_SELF, &rctx));
+  PetscCall(PetscRandomCreate(PETSC_COMM_WORLD, &rctx));
   PetscCall(VecSetRandom(x, rctx));
   PetscCall(PetscRandomDestroy(&rctx));
   PetscCall(MatMult(AplusJ, x, b));
 
   // Compute preconditioner operators
   PetscCall(MatGetLocalSize(Acondensed, &condensed_am, nullptr));
-  PetscCall(MatCreate(PETSC_COMM_SELF, &D));
-  PetscCall(MatSetType(D, MATSEQAIJ));
-  PetscCall(MatSetSizes(D, condensed_am, condensed_am, condensed_am, condensed_am));
+  PetscCall(MatCreate(PETSC_COMM_WORLD, &D));
+  PetscCall(MatSetType(D, MATMPIAIJ));
+  PetscCall(MatSetSizes(D, condensed_am, condensed_am, PETSC_DETERMINE, PETSC_DETERMINE));
   static constexpr PetscScalar zero = 0;
   for (PetscInt i = 0; i < condensed_am; ++i)
     PetscCall(MatSetValues(D, 1, &i, 1, &i, &zero, INSERT_VALUES));
@@ -137,7 +188,7 @@ main(int argc, char ** args)
   PetscCall(MatAXPY(JplusD, alpha, D, SUBSET_NONZERO_PATTERN));
 
   // Set preconditioner operators
-  PetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
+  PetscCall(KSPCreate(PETSC_COMM_WORLD, &ksp));
   PetscCall(KSPSetType(ksp, KSPFGMRES));
   PetscCall(KSPSetOperators(ksp, AplusJ, AplusJ));
   PetscCall(KSPSetNormType(ksp, KSP_NORM_UNPRECONDITIONED));
@@ -176,7 +227,8 @@ main(int argc, char ** args)
   PetscCall(MatDestroy(&D));
   PetscCall(MatDestroy(&AplusD));
   PetscCall(MatDestroy(&JplusD));
-  PetscCall(VecDestroy(&bound));
+  if (rank == 0)
+    PetscCall(VecDestroy(&bound));
   PetscCall(VecDestroy(&x));
   PetscCall(VecDestroy(&b));
   PetscCall(VecDestroy(&Qdiag));
@@ -184,6 +236,14 @@ main(int argc, char ** args)
   PetscCall(ISDestroy(&boundary_is));
   PetscCall(ISDestroy(&bulk_is));
   PetscCall(KSPDestroy(&ksp));
+  PetscCall(PetscFree(boundary_indices));
+
+#ifdef HAVE_GPERFTOOLS
+  // CPU profiling stop
+  if (has_cpu_profiling)
+    ProfilerStop();
+#endif
+
   PetscCall(PetscFinalize());
   return 0;
 }
