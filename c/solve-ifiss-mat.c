@@ -21,8 +21,8 @@ main(int argc, char ** args)
   PetscInt boundary_indices_size, is_start, is_end, am, an, bm, bn, condensed_am, maxits;
   PetscScalar * boundary_indices_values;
   IS boundary_is, bulk_is;
-  KSP ksp, kspA, kspJ;
-  PC pc, pckspA, pckspJ, pcA, pcJ;
+  KSP ksp;
+  PC pc, pcA, pcJ;
   PetscRandom rctx;
   PetscScalar gamma = 100;
   PetscScalar alpha = .01;
@@ -147,33 +147,21 @@ main(int argc, char ** args)
   PetscCall(KSPGetPC(ksp, &pc));
   PetscCall(PCSetType(pc, PCCOMPOSITE));
   PetscCall(PCCompositeSetType(pc, PC_COMPOSITE_SPECIAL));
-  PetscCall(PCCompositeAddPCType(pc, PCKSP));
-  PetscCall(PCCompositeAddPCType(pc, PCKSP));
-  PetscCall(PCCompositeGetPC(pc, 0, &pckspA));
-  PetscCall(PCCompositeGetPC(pc, 1, &pckspJ));
-  PetscCall(PCKSPGetKSP(pckspA, &kspA));
-  PetscCall(PCKSPGetKSP(pckspJ, &kspJ));
-  PetscCall(KSPSetTolerances(kspA, 1e-8, 1e-50, dtol, maxits));
-  PetscCall(KSPSetTolerances(kspJ, 1e-8, 1e-50, dtol, maxits));
-  PetscCall(KSPGetPC(kspA, &pcA));
-  PetscCall(KSPGetPC(kspJ, &pcJ));
-  PetscCall(PCSetType(pcA, PCLU));
+  PetscCall(PCCompositeAddPCType(pc, PCLU));
+  PetscCall(PCCompositeAddPCType(pc, PCLU));
+  PetscCall(PCCompositeGetPC(pc, 0, &pcA));
+  PetscCall(PCCompositeGetPC(pc, 1, &pcJ));
+  PetscCall(PCSetType(pcA, PCILU));
   PetscCall(PCSetType(pcJ, PCLU));
-  PetscCall(PCFactorSetMatSolverType(pcA, MATSOLVERMUMPS));
-  PetscCall(PCFactorSetMatSolverType(pcJ, MATSOLVERMUMPS));
   // We must also set the operators on the PCKSP's otherwise during setup of the composite PC it
   // will detect that its sub-pcs do not have operators attached and then it will attach the system
   // operator
-  PetscCall(PCSetOperators(pckspA, AplusD, AplusD));
   PetscCall(PCSetOperators(pcA, AplusD, AplusD));
-  PetscCall(PCSetOperators(pckspJ, JplusD, JplusD));
   PetscCall(PCSetOperators(pcJ, JplusD, JplusD));
   PetscCall(PCCompositeSpecialSetAlphaMat(pc, D));
 
   // Solve
   PetscCall(KSPSetFromOptions(ksp));
-  PetscCall(KSPSetFromOptions(kspA));
-  PetscCall(KSPSetFromOptions(kspJ));
   PetscCall(KSPSolve(ksp, b, x));
 
   PetscCall(MatDestroy(&A));
