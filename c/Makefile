@@ -21,6 +21,8 @@ ifneq ($(DEBUG), )
 	ifiss_CXXFLAGS += -O0
 endif
 
+PETSC_OPTIONS ?= -ksp_monitor
+
 all: ifiss
 
 ifiss: solve-ifiss-mat
@@ -32,19 +34,19 @@ clean: solve-ifiss-mat
 	rm solve-ifiss-mat
 
 serial_run: ifiss
-	OMP_NUM_THREADS=1 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is -ksp_monitor $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 run: ifiss
-	OMP_NUM_THREADS=1 mpiexec -np 2 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is -ksp_monitor $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 mpiexec -np 2 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 serial_valgrind: ifiss
-	OMP_NUM_THREADS=1 valgrind ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is -ksp_monitor $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 valgrind ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 valgrind: ifiss
-	OMP_NUM_THREADS=1 mpiexec -np 2 valgrind ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is -ksp_monitor $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 mpiexec -np 2 valgrind ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 profile: ifiss
-	OMP_NUM_THREADS=1 PROFILE_BASE=test mpiexec -np 2 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is -ksp_monitor $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 PROFILE_BASE=test mpiexec -np 2 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 serial_profile: ifiss
-	OMP_NUM_THREADS=1 PROFILE_BASE=test ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is -ksp_monitor $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 PROFILE_BASE=test ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
