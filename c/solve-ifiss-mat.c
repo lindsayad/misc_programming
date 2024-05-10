@@ -5,151 +5,14 @@ static char help[] = "(Attempts to) apply the 2023 preconditioner of Benzi and F
 #include <petscvec.h>
 #include <petscis.h>
 #include <petscksp.h>
-#include <petsc/private/matimpl.h>
-#include <petsc/private/pcimpl.h>
 #include <string>
 #include <iostream>
 #include <cassert>
 
-PetscErrorCode
-create_identity(PetscInt m, Mat & identity)
-{
-  PetscFunctionBegin;
-  PetscCall(MatCreate(PETSC_COMM_SELF, &identity));
-  PetscCall(MatSetType(identity, MATSEQAIJ));
-  PetscCall(MatSetSizes(identity, m, m, m, m));
-  static constexpr PetscScalar one = 1;
-  for (PetscInt i = 0; i < m; ++i)
-    PetscCall(MatSetValues(identity, 1, &i, 1, &i, &one, INSERT_VALUES));
-  PetscCall(MatAssemblyBegin(identity, MAT_FINAL_ASSEMBLY));
-  PetscCall(MatAssemblyEnd(identity, MAT_FINAL_ASSEMBLY));
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-struct SMWPC
-{
-  Mat U, UT, In, Ik, aI_plus_gammaUTU;
-  PC smw_cholesky;
-  PetscReal gamma, alpha;
-
-  SMWPC(Mat U_in, Mat In_in, PetscReal gamma_in, PetscReal alpha_in)
-    : U(U_in),
-      UT(nullptr),
-      In(In_in),
-      Ik(nullptr),
-      aI_plus_gammaUTU(nullptr),
-      smw_cholesky(nullptr),
-      gamma(gamma_in),
-      alpha(alpha_in)
-  {
-  }
-
-  PetscErrorCode destroy()
-  {
-    PetscFunctionBegin;
-
-    if (UT)
-      PetscCall(MatDestroy(&UT));
-    if (Ik)
-      PetscCall(MatDestroy(&Ik));
-    if (aI_plus_gammaUTU)
-      PetscCall(MatDestroy(&aI_plus_gammaUTU));
-    if (smw_cholesky)
-      PetscCall(PCDestroy(&smw_cholesky));
-
-    PetscFunctionReturn(PETSC_SUCCESS);
-  }
-
-  PetscErrorCode setup()
-  {
-    PetscInt k;
-
-    PetscFunctionBegin;
-
-    // Create UT
-    if (!UT)
-      PetscCall(MatTranspose(U, MAT_INITIAL_MATRIX, &UT));
-    else
-      PetscCall(MatTranspose(U, MAT_REUSE_MATRIX, &UT));
-
-    // Create Ik
-    if (!Ik)
-    {
-      PetscCall(MatGetLocalSize(U, nullptr, &k));
-      PetscCall(create_identity(k, Ik));
-    }
-
-    // Create sum Mat
-    if (!aI_plus_gammaUTU)
-      PetscCall(MatMatMult(UT, U, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &aI_plus_gammaUTU));
-    else
-      PetscCall(MatMatMult(UT, U, MAT_REUSE_MATRIX, PETSC_DEFAULT, &aI_plus_gammaUTU));
-    PetscCall(MatScale(aI_plus_gammaUTU, gamma));
-    PetscCall(MatAXPY(aI_plus_gammaUTU, alpha, Ik, SUBSET_NONZERO_PATTERN));
-
-    if (!smw_cholesky)
-      PetscCall(PCCreate(PETSC_COMM_SELF, &smw_cholesky));
-    PetscCall(PCSetType(smw_cholesky, PCCHOLESKY));
-    PetscCall(PCSetOperators(smw_cholesky, aI_plus_gammaUTU, aI_plus_gammaUTU));
-    PetscCall(PCSetFromOptions(smw_cholesky));
-
-    PetscCall(PCSetUp(smw_cholesky));
-
-    PetscFunctionReturn(PETSC_SUCCESS);
-  }
-
-  PetscErrorCode apply(Vec x, Vec y)
-  {
-    Vec w, w2, w3;
-    PetscFunctionBegin;
-    PetscCall(MatCreateVecs(UT, &w3, &w));
-    PetscCall(VecDuplicate(w, &w2));
-
-    // First term
-    PetscCall(MatMult(UT, x, w2));
-    PetscCall(PCApply(smw_cholesky, w2, w));
-    PetscCall(MatMult(U, w, y));
-    PetscCall(VecScale(y, -gamma / alpha));
-
-    // Second term
-    PetscCall(VecCopy(x, w3));
-    PetscCall(VecScale(w3, 1 / alpha));
-
-    PetscCall(VecAXPY(y, 1, w3));
-
-    PetscCall(VecDestroy(&w));
-    PetscCall(VecDestroy(&w2));
-    PetscCall(VecDestroy(&w3));
-    PetscFunctionReturn(PETSC_SUCCESS);
-  }
-};
-
-PetscErrorCode
-smw_setup(PC pc)
-{
-  SMWPC * ctx;
-
-  PetscFunctionBegin;
-  PetscCall(PCShellGetContext(pc, &ctx));
-  PetscCall(ctx->setup());
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
-PetscErrorCode
-smw_apply(PC pc, Vec x, Vec y)
-{
-  SMWPC * ctx;
-
-  PetscFunctionBegin;
-  PetscCall(PCShellGetContext(pc, &ctx));
-  PetscCall(ctx->apply(x, y));
-  PetscFunctionReturn(PETSC_SUCCESS);
-}
-
 int
 main(int argc, char ** args)
 {
-  Mat A, B, Q, Acondensed, Bcondensed, BT, J, AplusJ, QInv, I, AplusI, JplusI, U;
+  Mat A, B, Q, Acondensed, Bcondensed, BT, J, AplusJ, QInv, D, AplusD, JplusD;
   Vec bound, x, b, Qdiag, DVec;
   PetscBool flg;
   PetscViewer viewer;
@@ -158,10 +21,11 @@ main(int argc, char ** args)
   PetscInt boundary_indices_size, is_start, is_end, am, an, bm, bn, condensed_am, maxits;
   PetscScalar * boundary_indices_values;
   IS boundary_is, bulk_is;
-  KSP ksp;
-  PC pc, pcA, pcJ;
-  PetscReal gamma = 100;
-  PetscReal alpha = .01;
+  KSP ksp, kspA, kspJ;
+  PC pc, pckspA, pckspJ, pcA, pcJ;
+  PetscRandom rctx;
+  PetscScalar gamma = 100;
+  PetscScalar alpha = .01;
   PetscReal dtol;
 
   PetscFunctionBeginUser;
@@ -243,52 +107,38 @@ main(int argc, char ** args)
   PetscCall(MatMatMatMult(Bcondensed, QInv, BT, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &J));
   PetscCall(MatScale(J, gamma));
 
-  // Create sum of A + J
+  // Create sum
   PetscCall(MatDuplicate(Acondensed, MAT_COPY_VALUES, &AplusJ));
   PetscCall(MatAXPY(AplusJ, 1.0, J, DIFFERENT_NONZERO_PATTERN));
 
-  // Create decomposition matrices
-  // We've already used Qdiag, which currently represents Q^-1,  for it's necessary purposes. Let's
-  // convert it to represent Q^(-1/2)
-  PetscCall(VecSqrtAbs(Qdiag));
-  // We can similarly reuse Qinv
-  PetscCall(MatDiagonalSet(QInv, Qdiag, INSERT_VALUES));
-  PetscCall(MatAssemblyBegin(QInv, MAT_FINAL_ASSEMBLY));
-  PetscCall(MatAssemblyEnd(QInv, MAT_FINAL_ASSEMBLY));
-  // Create U
-  PetscCall(MatMatMult(Bcondensed, QInv, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &U));
-
   // Create x and b
   PetscCall(MatCreateVecs(AplusJ, &x, &b));
-  PetscCall(VecSet(x, 1));
+  PetscCall(PetscRandomCreate(PETSC_COMM_SELF, &rctx));
+  PetscCall(VecSetRandom(x, rctx));
+  PetscCall(PetscRandomDestroy(&rctx));
   PetscCall(MatMult(AplusJ, x, b));
 
   // Compute preconditioner operators
   PetscCall(MatGetLocalSize(Acondensed, &condensed_am, nullptr));
-  PetscCall(create_identity(condensed_am, I));
-  PetscCall(MatCreateVecs(I, &DVec, nullptr));
-  PetscCall(MatGetDiagonal(AplusJ, DVec));
-  PetscScalar * xx;
-  PetscCall(VecGetArray(DVec, &xx));
+  PetscCall(MatCreate(PETSC_COMM_SELF, &D));
+  PetscCall(MatSetType(D, MATSEQAIJ));
+  PetscCall(MatSetSizes(D, condensed_am, condensed_am, condensed_am, condensed_am));
+  static constexpr PetscScalar zero = 0;
   for (PetscInt i = 0; i < condensed_am; ++i)
-    xx[i] = 1.0 / PetscSqrtReal(PetscAbsScalar(xx[i]));
-  PetscCall(VecRestoreArray(DVec, &xx));
-  PetscCall(MatDiagonalScale(AplusJ, DVec, DVec));
-  PetscCall(MatDiagonalScale(Acondensed, DVec, DVec));
-  PetscCall(MatDiagonalScale(J, DVec, DVec));
-  PetscCall(VecPointwiseMult(b, DVec, b));
-  PetscCall(MatDuplicate(Acondensed, MAT_COPY_VALUES, &AplusI));
-  PetscCall(MatAXPY(AplusI, alpha, I, SUBSET_NONZERO_PATTERN));
-  PetscCall(MatDuplicate(J, MAT_COPY_VALUES, &JplusI));
-  PetscCall(MatAXPY(JplusI, alpha, I, SUBSET_NONZERO_PATTERN));
-  PetscCall(MatDiagonalScale(U, DVec, nullptr));
-
-  // Create our SMW context
-  SMWPC test_pc(U, I, gamma, alpha);
+    PetscCall(MatSetValues(D, 1, &i, 1, &i, &zero, INSERT_VALUES));
+  PetscCall(MatAssemblyBegin(D, MAT_FINAL_ASSEMBLY));
+  PetscCall(MatAssemblyEnd(D, MAT_FINAL_ASSEMBLY));
+  PetscCall(MatCreateVecs(D, &DVec, nullptr));
+  PetscCall(MatGetDiagonal(AplusJ, DVec));
+  PetscCall(MatDiagonalSet(D, DVec, INSERT_VALUES));
+  PetscCall(MatDuplicate(Acondensed, MAT_COPY_VALUES, &AplusD));
+  PetscCall(MatAXPY(AplusD, alpha, D, SUBSET_NONZERO_PATTERN));
+  PetscCall(MatDuplicate(J, MAT_COPY_VALUES, &JplusD));
+  PetscCall(MatAXPY(JplusD, alpha, D, SUBSET_NONZERO_PATTERN));
 
   // Set preconditioner operators
   PetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
-  PetscCall(KSPSetType(ksp, KSPGMRES));
+  PetscCall(KSPSetType(ksp, KSPFGMRES));
   PetscCall(KSPSetOperators(ksp, AplusJ, AplusJ));
   PetscCall(KSPSetNormType(ksp, KSP_NORM_UNPRECONDITIONED));
   PetscCall(KSPGetTolerances(ksp, nullptr, nullptr, &dtol, &maxits));
@@ -297,20 +147,33 @@ main(int argc, char ** args)
   PetscCall(KSPGetPC(ksp, &pc));
   PetscCall(PCSetType(pc, PCCOMPOSITE));
   PetscCall(PCCompositeSetType(pc, PC_COMPOSITE_SPECIAL));
-  PetscCall(PCCompositeAddPCType(pc, PCLU));
-  PetscCall(PCCompositeAddPCType(pc, PCSHELL));
-  PetscCall(PCCompositeGetPC(pc, 0, &pcA));
-  PetscCall(PCCompositeGetPC(pc, 1, &pcJ));
-  // PetscCall(PCFactorSetMatSolverType(pcA, MATSOLVERMUMPS));
-
-  PetscCall(PCSetOperators(pcA, AplusI, AplusI));
-  PetscCall(PCShellSetContext(pcJ, &test_pc));
-  PetscCall(PCShellSetApply(pcJ, smw_apply));
-  PetscCall(PCShellSetSetUp(pcJ, smw_setup));
-  PetscCall(PCCompositeSpecialSetAlphaMat(pc, I));
+  PetscCall(PCCompositeAddPCType(pc, PCKSP));
+  PetscCall(PCCompositeAddPCType(pc, PCKSP));
+  PetscCall(PCCompositeGetPC(pc, 0, &pckspA));
+  PetscCall(PCCompositeGetPC(pc, 1, &pckspJ));
+  PetscCall(PCKSPGetKSP(pckspA, &kspA));
+  PetscCall(PCKSPGetKSP(pckspJ, &kspJ));
+  PetscCall(KSPSetTolerances(kspA, 1e-8, 1e-50, dtol, maxits));
+  PetscCall(KSPSetTolerances(kspJ, 1e-8, 1e-50, dtol, maxits));
+  PetscCall(KSPGetPC(kspA, &pcA));
+  PetscCall(KSPGetPC(kspJ, &pcJ));
+  PetscCall(PCSetType(pcA, PCLU));
+  PetscCall(PCSetType(pcJ, PCLU));
+  PetscCall(PCFactorSetMatSolverType(pcA, MATSOLVERMUMPS));
+  PetscCall(PCFactorSetMatSolverType(pcJ, MATSOLVERMUMPS));
+  // We must also set the operators on the PCKSP's otherwise during setup of the composite PC it
+  // will detect that its sub-pcs do not have operators attached and then it will attach the system
+  // operator
+  PetscCall(PCSetOperators(pckspA, AplusD, AplusD));
+  PetscCall(PCSetOperators(pcA, AplusD, AplusD));
+  PetscCall(PCSetOperators(pckspJ, JplusD, JplusD));
+  PetscCall(PCSetOperators(pcJ, JplusD, JplusD));
+  PetscCall(PCCompositeSpecialSetAlphaMat(pc, D));
 
   // Solve
   PetscCall(KSPSetFromOptions(ksp));
+  PetscCall(KSPSetFromOptions(kspA));
+  PetscCall(KSPSetFromOptions(kspJ));
   PetscCall(KSPSolve(ksp, b, x));
 
   PetscCall(MatDestroy(&A));
@@ -322,10 +185,9 @@ main(int argc, char ** args)
   PetscCall(MatDestroy(&J));
   PetscCall(MatDestroy(&AplusJ));
   PetscCall(MatDestroy(&QInv));
-  PetscCall(MatDestroy(&I));
-  PetscCall(MatDestroy(&AplusI));
-  PetscCall(MatDestroy(&JplusI));
-  PetscCall(MatDestroy(&U));
+  PetscCall(MatDestroy(&D));
+  PetscCall(MatDestroy(&AplusD));
+  PetscCall(MatDestroy(&JplusD));
   PetscCall(VecDestroy(&bound));
   PetscCall(VecDestroy(&x));
   PetscCall(VecDestroy(&b));
@@ -334,7 +196,6 @@ main(int argc, char ** args)
   PetscCall(ISDestroy(&boundary_is));
   PetscCall(ISDestroy(&bulk_is));
   PetscCall(KSPDestroy(&ksp));
-  PetscCall(test_pc.destroy());
   PetscCall(PetscFinalize());
   return 0;
 }
