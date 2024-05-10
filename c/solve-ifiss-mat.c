@@ -90,7 +90,7 @@ main(int argc, char ** args)
     PetscCall(VecGetLocalSize(bound, &boundary_indices_size));
     PetscCall(VecGetArray(bound, &boundary_indices_values));
   }
-  PetscCallMPI(MPI_Bcast(&boundary_indices_size, 1, MPI_INT, 0, PETSC_COMM_WORLD));
+  PetscCallMPI(MPI_Bcast(&boundary_indices_size, 1, MPIU_INT, 0, PETSC_COMM_WORLD));
   if (rank != 0)
     PetscCall(PetscMalloc1(boundary_indices_size, &boundary_indices_values));
   PetscCallMPI(
@@ -198,17 +198,16 @@ main(int argc, char ** args)
   PetscCall(KSPGetPC(ksp, &pc));
   PetscCall(PCSetType(pc, PCCOMPOSITE));
   PetscCall(PCCompositeSetType(pc, PC_COMPOSITE_SPECIAL));
-  PetscCall(PCCompositeAddPCType(pc, PCLU));
+  PetscCall(PCCompositeAddPCType(pc, PCILU));
   PetscCall(PCCompositeAddPCType(pc, PCLU));
   PetscCall(PCCompositeGetPC(pc, 0, &pcA));
   PetscCall(PCCompositeGetPC(pc, 1, &pcJ));
-  PetscCall(PCSetType(pcA, PCILU));
-  PetscCall(PCSetType(pcJ, PCLU));
   // We must also set the operators on the PCKSP's otherwise during setup of the composite PC it
   // will detect that its sub-pcs do not have operators attached and then it will attach the system
   // operator
   PetscCall(PCSetOperators(pcA, AplusD, AplusD));
   PetscCall(PCSetOperators(pcJ, JplusD, JplusD));
+  PetscCall(PCFactorSetMatSolverType(pcJ, MATSOLVERSTRUMPACK));
   PetscCall(PCCompositeSpecialSetAlphaMat(pc, D));
 
   // Solve
