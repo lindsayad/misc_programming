@@ -17,10 +17,6 @@ ifneq ($(GPERF_DIR), )
     ifiss_LDFLAGS += -L$(GPERF_DIR)/lib -Wl,-rpath,$(GPERF_DIR)/lib -ltcmalloc_and_profiler
 endif
 
-ifneq ($(DEBUG), )
-	ifiss_CXXFLAGS += -O0
-endif
-
 PETSC_OPTIONS ?= -ksp_monitor
 
 all: ifiss
@@ -32,6 +28,15 @@ solve-ifiss-mat: solve-ifiss-mat.c
 
 clean: solve-ifiss-mat
 	rm solve-ifiss-mat
+
+dbg:
+	mpicxx -Werror -Wall -g -O0 $(ifiss_CXXFLAGS) solve-ifiss-mat.c -o solve-ifiss-mat $(ifiss_LDFLAGS)
+
+gdb : dbg
+	OMP_NUM_THREADS=1 gdb --args ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
+
+opt:
+	mpicxx -Werror -Wall -g -O2 $(ifiss_CXXFLAGS) solve-ifiss-mat.c -o solve-ifiss-mat $(ifiss_LDFLAGS)
 
 serial_run: ifiss
 	OMP_NUM_THREADS=1 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
