@@ -366,6 +366,7 @@ main(int argc, char ** args)
   PetscCall(PCCompositeGetPC(pc, 0, &pcA));
   PetscCall(PCCompositeGetPC(pc, 1, &pcJ));
   PetscCall(PCSetOperators(pcA, AplusD, AplusD));
+  PetscCall(PCSetOperators(pcJ, AplusJ, AplusJ));
   PetscCall(PCShellSetContext(pcJ, &test_pc));
   PetscCall(PCShellSetApply(pcJ, smw_apply));
   PetscCall(PCShellSetSetUp(pcJ, smw_setup));
