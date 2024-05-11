@@ -57,6 +57,7 @@ struct SMWPC
     PetscCall(MatDestroy(&UT));
     PetscCall(MatDestroy(&Ik));
     PetscCall(MatDestroy(&I_plus_gammaUTaDinvU));
+    PetscCall(MatDestroy(&aD));
     PetscCall(MatDestroy(&aDinv));
     PetscCall(PCDestroy(&smw_cholesky));
 
@@ -73,11 +74,8 @@ struct SMWPC
       PetscFunctionReturn(PETSC_SUCCESS);
 
     // Create aD
-    if (!aD)
-    {
-      PetscCall(MatDuplicate(D, MAT_COPY_VALUES, &aD));
-      PetscCall(MatScale(aD, alpha));
-    }
+    PetscCall(MatDuplicate(D, MAT_COPY_VALUES, &aD));
+    PetscCall(MatScale(aD, alpha));
 
     // Create aDinv
     PetscCall(MatDuplicate(aD, MAT_DO_NOT_COPY_VALUES, &aDinv));
@@ -91,32 +89,23 @@ struct SMWPC
     }
 
     // Create UT
-    if (!UT)
-      PetscCall(MatTranspose(U, MAT_INITIAL_MATRIX, &UT));
+    PetscCall(MatTranspose(U, MAT_INITIAL_MATRIX, &UT));
 
     // Create Ik
-    if (!Ik)
-    {
-      PetscCall(MatGetLocalSize(U, nullptr, &k));
-      PetscCall(create_identity(k, Ik));
-    }
+    PetscCall(MatGetLocalSize(U, nullptr, &k));
+    PetscCall(create_identity(k, Ik));
 
     // Create sum Mat
-    if (!I_plus_gammaUTaDinvU)
-      PetscCall(
-          MatMatMatMult(UT, aDinv, U, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &I_plus_gammaUTaDinvU));
-    else
-      PetscCall(
-          MatMatMatMult(UT, aDinv, U, MAT_REUSE_MATRIX, PETSC_DEFAULT, &I_plus_gammaUTaDinvU));
+    PetscCall(
+        MatMatMatMult(UT, aDinv, U, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &I_plus_gammaUTaDinvU));
     PetscCall(MatScale(I_plus_gammaUTaDinvU, gamma));
     PetscCall(MatAXPY(I_plus_gammaUTaDinvU, 1., Ik, SUBSET_NONZERO_PATTERN));
 
-    if (!smw_cholesky)
-      PetscCall(PCCreate(PETSC_COMM_WORLD, &smw_cholesky));
+    PetscCall(PCCreate(PETSC_COMM_WORLD, &smw_cholesky));
     PetscCall(PCSetType(smw_cholesky, PCCHOLESKY));
     PetscCall(PCSetOperators(smw_cholesky, I_plus_gammaUTaDinvU, I_plus_gammaUTaDinvU));
+    PetscCall(PCSetOptionsPrefix(smw_cholesky, "smw_"));
     PetscCall(PCSetFromOptions(smw_cholesky));
-
     PetscCall(PCSetUp(smw_cholesky));
 
     setup_called = true;
