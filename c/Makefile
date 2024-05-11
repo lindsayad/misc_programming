@@ -45,10 +45,10 @@ run: ifiss
 	OMP_NUM_THREADS=1 mpiexec -np 2 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 serial_valgrind: ifiss
-	OMP_NUM_THREADS=1 valgrind ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 valgrind $(VALGRIND_OPTIONS) ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 valgrind: ifiss
-	OMP_NUM_THREADS=1 mpiexec -np 2 valgrind ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
+	OMP_NUM_THREADS=1 mpiexec -np 2 valgrind $(VALGRIND_OPTIONS) ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
 
 profile: ifiss
 	OMP_NUM_THREADS=1 PROFILE_BASE=test mpiexec -np 2 ./solve-ifiss-mat -fAnst Anst.mat -fBst Bst.mat -fQ Q.mat -fbound bound.is $(PETSC_OPTIONS)
