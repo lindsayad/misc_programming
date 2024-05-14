@@ -2,11 +2,11 @@
 
 # $(info Before assignment: PETSC_DIR=$(PETSC_DIR))
 ifeq ($(PETSC_DIR), )
-    PETSC_DIR := $(HOME)/projects/ip-hdg/petsc
+    PETSC_DIR := $(HOME)/petsc
     # $(info After assignment: PETSC_DIR=$(PETSC_DIR))
 endif
 ifeq ($(PETSC_ARCH), )
-	PETSC_ARCH := arch-moose
+	PETSC_ARCH := arch-linux-c-debug
 endif
 
 ifiss_CXXFLAGS := -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include

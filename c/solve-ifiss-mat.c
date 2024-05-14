@@ -16,12 +16,14 @@ static char help[] = "(Attempts to) apply the 2023 preconditioner of Benzi and F
 PetscErrorCode
 create_identity(PetscInt m, Mat & identity)
 {
+  PetscInt start, stop;
   PetscFunctionBegin;
   PetscCall(MatCreate(PETSC_COMM_WORLD, &identity));
   PetscCall(MatSetType(identity, MATMPIAIJ));
   PetscCall(MatSetSizes(identity, m, m, PETSC_DETERMINE, PETSC_DETERMINE));
+  PetscCall(MatGetOwnershipRange(identity, &start, &stop));
   static constexpr PetscScalar one = 1;
-  for (PetscInt i = 0; i < m; ++i)
+  for (PetscInt i = start; i < stop; ++i)
     PetscCall(MatSetValues(identity, 1, &i, 1, &i, &one, INSERT_VALUES));
   PetscCall(MatAssemblyBegin(identity, MAT_FINAL_ASSEMBLY));
   PetscCall(MatAssemblyEnd(identity, MAT_FINAL_ASSEMBLY));
@@ -171,7 +173,7 @@ main(int argc, char ** args)
   PetscViewer viewer;
   char file[PETSC_MAX_PATH_LEN];
   PetscInt * boundary_indices;
-  PetscInt boundary_indices_size, am, an, bm, bn, condensed_am, maxits, astart, aend;
+  PetscInt boundary_indices_size, am, an, bm, bn, condensed_am, maxits, astart, aend, Dstart, Dend;
   PetscScalar * boundary_indices_values;
   IS boundary_is, bulk_is;
   KSP ksp;
@@ -327,15 +329,22 @@ main(int argc, char ** args)
   PetscCall(PetscRandomCreate(PETSC_COMM_WORLD, &rctx));
   PetscCall(VecSetRandom(x, rctx));
   PetscCall(PetscRandomDestroy(&rctx));
-  PetscCall(MatMult(AplusJ, x, b));
+  /* PetscCall(MatMult(AplusJ, x, b)); */
+  {
+    PetscViewer bviewer;
+    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_WORLD, "b.vec", FILE_MODE_READ, &bviewer));
+    PetscCall(VecLoad(b, bviewer));
+    PetscCall(PetscViewerDestroy(&bviewer));
+  }
 
   // Compute preconditioner operators
   PetscCall(MatGetLocalSize(Acondensed, &condensed_am, nullptr));
   PetscCall(MatCreate(PETSC_COMM_WORLD, &D));
   PetscCall(MatSetType(D, MATMPIAIJ));
   PetscCall(MatSetSizes(D, condensed_am, condensed_am, PETSC_DETERMINE, PETSC_DETERMINE));
+  PetscCall(MatGetOwnershipRange(D, &Dstart, &Dend));
   static constexpr PetscScalar zero = 0;
-  for (PetscInt i = 0; i < condensed_am; ++i)
+  for (PetscInt i = Dstart; i < Dend; ++i)
     PetscCall(MatSetValues(D, 1, &i, 1, &i, &zero, INSERT_VALUES));
   PetscCall(MatAssemblyBegin(D, MAT_FINAL_ASSEMBLY));
   PetscCall(MatAssemblyEnd(D, MAT_FINAL_ASSEMBLY));
