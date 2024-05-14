@@ -329,13 +329,7 @@ main(int argc, char ** args)
   PetscCall(PetscRandomCreate(PETSC_COMM_WORLD, &rctx));
   PetscCall(VecSetRandom(x, rctx));
   PetscCall(PetscRandomDestroy(&rctx));
-  /* PetscCall(MatMult(AplusJ, x, b)); */
-  {
-    PetscViewer bviewer;
-    PetscCall(PetscViewerBinaryOpen(PETSC_COMM_WORLD, "b.vec", FILE_MODE_READ, &bviewer));
-    PetscCall(VecLoad(b, bviewer));
-    PetscCall(PetscViewerDestroy(&bviewer));
-  }
+  PetscCall(MatMult(AplusJ, x, b));
 
   // Compute preconditioner operators
   PetscCall(MatGetLocalSize(Acondensed, &condensed_am, nullptr));
