@@ -3,6 +3,10 @@
 #include <iostream>
 using namespace std;
 
+#ifndef __GLIBCXX__
+#error Not using libstdc++
+#endif
+
 // int
 // main()
 // {

@@ -1,15 +1,14 @@
 #include <mpi.h>
 #include <iostream>
 
-int main(int argc, char** argv) {
+int
+main(int argc, char ** argv)
+{
   // Initialize the MPI environment
   MPI_Init(NULL, NULL);
 
   MPI_Comm world = MPI_COMM_WORLD;
   MPI_Comm self = MPI_COMM_SELF;
-
-  std::cout << world << std::endl;
-  std::cout << self << std::endl;
 
   // Get the number of processes
   int world_size;
@@ -26,7 +25,9 @@ int main(int argc, char** argv) {
 
   // Print off a hello world message
   printf("Hello world from processor %s, rank %d out of %d processors\n",
-         processor_name, world_rank, world_size);
+         processor_name,
+         world_rank,
+         world_size);
 
   // Finalize the MPI environment.
   MPI_Finalize();
