@@ -24,14 +24,14 @@ main()
 
   std::cout << "Detected " << deviceCount << " CUDA device(s)" << std::endl;
 
-  if (deviceCount > 0)
+  for (int i = 0; i < deviceCount; ++i)
   {
     CUdevice dev;
-    cuDeviceGet(&dev, 0);
+    cuDeviceGet(&dev, i);
 
     char name[128];
     cuDeviceGetName(name, sizeof(name), dev);
-    std::cout << "Device 0: " << name << std::endl;
+    std::cout << "Device " << i << ": " << name << std::endl;
   }
 
   return 0;
